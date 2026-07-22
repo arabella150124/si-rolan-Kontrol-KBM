@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SI-ROLAN - SMKS Sanjaya Bajawa</title>
-    
+
     <!-- PWA Web App Manifest (Data URI) -->
     <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIlNJLVJPTEFOIC0gU01LUyBTYW5qYXlhIEJhamF3YSIsCiAgInNob3J0X25hbWUiOiAiU0ktUk9MQU4iLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzBmMTcyYSIsCiAgInRoZW1lX2NvbG9yIjogIiMwZjE3MmEiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL2Nkbi1pY29ucy1wbmcud2lkcGGFY2suY29tLzUxMi8zMTM1LzMxMzU3MTUucG5nIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgXQp9">
     <meta name="theme-color" content="#0f172a">
@@ -12,7 +12,7 @@
     <!-- Tailwind CSS & FontAwesome CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         body {
             background: #0f172a;
@@ -28,7 +28,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 1rem;
         }
-        /* Responsif Layout Rules */
+        /* Responsif Layout Rules (Fixed Sidebar Desktop, Bottom Nav Mobile) */
         @media (max-width: 768px) {
             .desktop-sidebar { display: none !important; }
             .mobile-bottom-nav { display: flex !important; }
@@ -37,18 +37,19 @@
             .desktop-sidebar { display: flex !important; }
             .mobile-bottom-nav { display: none !important; }
         }
-        #navbar-iframe, .navbar, .header-outer, .footer-outer, .sidebar-wrapper {
+        /* Sembunyikan Komponen Default Blogger */
+        #navbar-iframe, .navbar, .header-outer, .footer-outer, .sidebar-wrapper, .post-header, .post-footer {
             display: none !important;
         }
     </style>
 </head>
 <body class="antialiased text-slate-100 flex flex-col min-h-screen">
 
-    <!-- LOGIN CONTAINER -->
+    <!-- 1. HALAMAN CLEAN LOGIN -->
     <div id="loginScreen" class="min-h-screen w-full flex items-center justify-center p-4 bg-slate-950">
         <div class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
             
-            <!-- LEFT PANEL: APP INFO -->
+            <!-- LEFT PANEL: INFORMASI SISTEM -->
             <div class="bg-slate-900 p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-800">
                 <div>
                     <div class="flex items-center space-x-3 mb-6">
@@ -77,11 +78,11 @@
                 </div>
             </div>
 
-            <!-- RIGHT PANEL: CLEAN LOGIN FORM -->
+            <!-- RIGHT PANEL: FORM INPUT MANUAL -->
             <div class="bg-white p-8 text-slate-800 flex flex-col justify-between">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-900 mb-1">Selamat Datang</h2>
-                    <p class="text-xs text-slate-500 mb-6">Silakan masukkan akun terdaftar Anda untuk melanjutkan.</p>
+                    <p class="text-xs text-slate-500 mb-6">Silakan masukkan kredensial terdaftar Anda untuk melanjutkan.</p>
 
                     <!-- Alert Notifikasi Error -->
                     <div id="loginErrorAlert" class="hidden mb-4 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 text-xs flex items-center gap-2">
@@ -89,10 +90,10 @@
                         <span id="loginErrorMessage">Username atau Kata Sandi Salah!</span>
                     </div>
 
-                    <!-- Input Form -->
+                    <!-- Form Login -->
                     <form id="formLogin" onsubmit="handleLoginSubmit(event)" class="space-y-4">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Username / Email / ID Pengguna</label>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Username / Email / NIP</label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                                     <i class="fa-solid fa-user"></i>
@@ -131,14 +132,14 @@
         </div>
     </div>
 
-    <!-- MAIN DASHBOARD APP CONTAINER -->
+    <!-- 2. KONTEN UTAMA DASHBOARD APLIKASI -->
     <div id="mainDashboard" class="hidden min-h-screen flex flex-col md:flex-row w-full bg-slate-950">
         
-        <!-- SIDEBAR DESKTOP -->
+        <!-- SIDEBAR DESKTOP (FIXED LEFT) -->
         <aside class="desktop-sidebar w-64 bg-slate-900 border-r border-slate-800 p-4 flex flex-col justify-between shrink-0">
             <div>
                 <div class="flex items-center gap-3 pb-6 border-b border-slate-800">
-                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-md">
                         <i class="fa-solid fa-graduation-cap"></i>
                     </div>
                     <div>
@@ -147,14 +148,14 @@
                     </div>
                 </div>
 
-                <!-- User Profile Info -->
+                <!-- Profile Info User -->
                 <div class="my-4 p-3 bg-slate-800/60 rounded-lg border border-slate-700/50 flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs" id="userAvatar">
+                    <div class="w-9 h-9 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 flex items-center justify-center font-bold text-sm" id="userAvatar">
                         A
                     </div>
                     <div class="overflow-hidden">
                         <p class="text-xs font-semibold text-white truncate" id="userDisplayName">Administrator</p>
-                        <p class="text-[10px] text-slate-400 uppercase tracking-wider" id="userRoleBadge">ADMIN</p>
+                        <p class="text-[10px] text-amber-400 font-medium uppercase tracking-wider" id="userRoleBadge">ADMIN</p>
                     </div>
                 </div>
 
@@ -175,13 +176,13 @@
             </div>
 
             <div class="pt-4 border-t border-slate-800">
-                <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg bg-rose-600/20 text-rose-400 hover:bg-rose-600/30 text-sm font-medium transition">
+                <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg bg-rose-600/20 text-rose-400 hover:bg-rose-600/30 text-sm font-medium transition border border-rose-500/20">
                     <i class="fa-solid fa-right-from-bracket"></i> Logout / Keluar
                 </button>
             </div>
         </aside>
 
-        <!-- MAIN CONTENT AREA -->
+        <!-- AREA KONTEN UTAMA -->
         <main class="flex-1 p-4 md:p-8 overflow-y-auto pb-24 md:pb-8">
             <!-- Header Bar -->
             <header class="flex justify-between items-center pb-4 mb-6 border-b border-slate-800">
@@ -194,61 +195,107 @@
                 </button>
             </header>
 
-            <!-- TAB 1: DASHBOARD CONTENT -->
+            <!-- TAB 1: DASHBOARD UTAMA -->
             <div id="tabDashboard" class="tab-content space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div class="glass-panel p-5 border-l-4 border-blue-500">
                         <p class="text-xs text-slate-400">Total Kelas KBM</p>
-                        <h3 class="text-2xl font-bold text-white mt-1">12 Kelas</h3>
+                        <h3 class="text-2xl font-bold text-white mt-1" id="statTotalKelas">12 Kelas</h3>
                     </div>
                     <div class="glass-panel p-5 border-l-4 border-emerald-500">
-                        <p class="text-xs text-slate-400">Guru Hadir</p>
-                        <h3 class="text-2xl font-bold text-white mt-1">18 Guru</h3>
+                        <p class="text-xs text-slate-400">Guru Hadir Hari Ini</p>
+                        <h3 class="text-2xl font-bold text-white mt-1" id="statGuruHadir">18 Guru</h3>
                     </div>
                     <div class="glass-panel p-5 border-l-4 border-amber-500">
                         <p class="text-xs text-slate-400">Tugas Inval</p>
-                        <h3 class="text-2xl font-bold text-white mt-1">2 Kelas</h3>
+                        <h3 class="text-2xl font-bold text-white mt-1" id="statTugasInval">2 Kelas</h3>
                     </div>
                     <div class="glass-panel p-5 border-l-4 border-purple-500">
-                        <p class="text-xs text-slate-400">Status Laporan</p>
-                        <h3 class="text-lg font-bold text-emerald-400 mt-1">Tervalidasi</h3>
+                        <p class="text-xs text-slate-400">Status Validasi Harian</p>
+                        <h3 class="text-lg font-bold text-emerald-400 mt-1" id="statStatusLaporan">TERVALIDASI</h3>
                     </div>
                 </div>
 
                 <div class="glass-panel p-6">
                     <h3 class="text-base font-semibold text-white mb-4"><i class="fa-solid fa-clock-rotate-left mr-2 text-blue-400"></i>Aktivitas Kontrol Real-Time</h3>
                     <div class="space-y-3" id="recentActivityList">
-                        <div class="p-3 bg-slate-800/40 rounded-lg border border-slate-700/40 flex justify-between items-center text-xs">
-                            <span class="text-slate-300"><i class="fa-solid fa-check text-emerald-400 mr-2"></i>Kelas X TKJ 1 - KBM Berjalan (Bahasa Indonesia)</span>
-                            <span class="text-slate-500">07:45 WITA</span>
-                        </div>
-                        <div class="p-3 bg-slate-800/40 rounded-lg border border-slate-700/40 flex justify-between items-center text-xs">
-                            <span class="text-slate-300"><i class="fa-solid fa-user-clock text-amber-400 mr-2"></i>Kelas XI RPL - Guru Inval Diisi (Tugas Mandiri)</span>
-                            <span class="text-slate-500">08:30 WITA</span>
-                        </div>
+                        <!-- Rendered dynamically -->
                     </div>
                 </div>
             </div>
 
-            <!-- TAB 2: PRESENSI & KBM -->
+            <!-- TAB 2: KONTROL KBM & PRESENSI -->
             <div id="tabPresensi" class="tab-content hidden space-y-6">
                 <div class="glass-panel p-6">
-                    <h3 class="text-base font-semibold text-white mb-4"><i class="fa-solid fa-clipboard-list mr-2 text-emerald-400"></i>Input Presensi Jam KBM</h3>
-                    <p class="text-xs text-slate-400 mb-4">Pilih kelas dan atur kehadiran guru serta catatan ketidakhadiran siswa per jam pelajaran.</p>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <select class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
-                            <option>-- Pilih Kelas --</option>
-                            <option>X TKJ 1</option>
-                            <option>X TKJ 2</option>
-                            <option>XI TKR 1</option>
-                        </select>
-                        <select class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
-                            <option>Jam Ke-1 & Ke-2</option>
-                            <option>Jam Ke-3 & Ke-4</option>
-                        </select>
-                        <button class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium py-2 px-4 rounded-lg transition">
-                            Simpan Presensi KBM
+                    <h3 class="text-base font-semibold text-white mb-2"><i class="fa-solid fa-clipboard-list mr-2 text-emerald-400"></i>Pencatatan Presensi & Jurnal KBM</h3>
+                    <p class="text-xs text-slate-400 mb-6">Input kehadiran guru, materi, serta siswa tidak hadir per jam pelajaran.</p>
+                    
+                    <form onsubmit="handleSavePresensi(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Pilih Kelas</label>
+                                <select id="selectPresensiKelas" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                                    <option value="X TKJ 1">X TKJ 1</option>
+                                    <option value="X TKJ 2">X TKJ 2</option>
+                                    <option value="XI TKR 1">XI TKR 1</option>
+                                    <option value="XII RPL 1">XII RPL 1</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Jam Pelajaran</label>
+                                <select id="selectJamKe" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                                    <option value="Jam Ke-1 & 2">Jam Ke-1 & 2 (07.30 - 09.00)</option>
+                                    <option value="Jam Ke-3 & 4">Jam Ke-3 & 4 (09.15 - 10.45)</option>
+                                    <option value="Jam Ke-5 & 6">Jam Ke-5 & 6 (11.15 - 12.45)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Status Kehadiran Guru</label>
+                                <select id="selectStatusGuru" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                                    <option value="Hadir">Hadir Mengajar</option>
+                                    <option value="Tugas Inval">Tugas Inval (Ada Tugas)</option>
+                                    <option value="Tanpa Keterangan">Tanpa Keterangan / Kosong</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Mata Pelajaran & Ringkasan Materi</label>
+                                <input type="text" id="inputMateri" required placeholder="Contoh: Pemrograman Web - Pengenalan HTML5" 
+                                    class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Catatan Siswa Absen (Sakit/Izin/Alpha)</label>
+                                <input type="text" id="inputSiswaAbsen" placeholder="Contoh: Budi (A), Siti (S)" 
+                                    class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium py-2.5 px-5 rounded-lg transition flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> Simpan Catatan Presensi
                         </button>
+                    </form>
+                </div>
+
+                <!-- Tabel Riwayat Jurnal -->
+                <div class="glass-panel p-6">
+                    <h3 class="text-sm font-semibold text-white mb-4">Jurnal Kontrol KBM Hari Ini</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-800/80 text-slate-400 uppercase text-[10px]">
+                                <tr>
+                                    <th class="p-3">Kelas</th>
+                                    <th class="p-3">Jam</th>
+                                    <th class="p-3">Status Guru</th>
+                                    <th class="p-3">Materi</th>
+                                    <th class="p-3">Siswa Absen</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablePresensiBody" class="divide-y divide-slate-800">
+                                <!-- Rendered dynamically -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -256,22 +303,57 @@
             <!-- TAB 3: VALIDASI LAPORAN -->
             <div id="tabLaporan" class="tab-content hidden space-y-6">
                 <div class="glass-panel p-6">
-                    <h3 class="text-base font-semibold text-white mb-4"><i class="fa-solid fa-file-signature mr-2 text-amber-400"></i>Pengesahan Laporan KBM Harian</h3>
-                    <p class="text-xs text-slate-400 mb-4">Modul verifikasi dan penguncian laporan harian oleh Waka Kurikulum & Kepala Sekolah.</p>
-                    <button class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium py-2.5 px-5 rounded-lg transition">
-                        <i class="fa-solid fa-lock mr-2"></i>Sahkan & Kunci Laporan Hari Ini
-                    </button>
+                    <h3 class="text-base font-semibold text-white mb-2"><i class="fa-solid fa-file-signature mr-2 text-amber-400"></i>Pengesahan & Penguncian Laporan Harian</h3>
+                    <p class="text-xs text-slate-400 mb-6">Modul verifikasi dan validasi resmi oleh Waka Kurikulum dan Kepala Sekolah.</p>
+                    
+                    <div class="p-4 bg-slate-800/50 rounded-lg border border-slate-700/50 mb-6 space-y-2 text-xs">
+                        <div class="flex justify-between text-slate-300">
+                            <span>Status Pengesahan Kurikulum:</span>
+                            <span id="statusKurikulum" class="font-bold text-amber-400">MENUNGGU VALIDASI</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                            <span>Status Pengesahan Kepala Sekolah:</span>
+                            <span id="statusKepsek" class="font-bold text-amber-400">MENUNGGU VALIDASI</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3">
+                        <button onclick="handleValidasi('KURIKULUM')" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium py-2.5 px-4 rounded-lg transition flex items-center gap-2">
+                            <i class="fa-solid fa-stamp"></i> Sahkan Sebagai Waka Kurikulum
+                        </button>
+                        <button onclick="handleValidasi('KEPSEK')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium py-2.5 px-4 rounded-lg transition flex items-center gap-2">
+                            <i class="fa-solid fa-signature"></i> Sahkan Sebagai Kepala Sekolah
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- TAB 4: MASTER DATA -->
+            <!-- TAB 4: MASTER DATA SEKOLAH -->
             <div id="tabMaster" class="tab-content hidden space-y-6">
                 <div class="glass-panel p-6">
-                    <h3 class="text-base font-semibold text-white mb-4"><i class="fa-solid fa-database mr-2 text-purple-400"></i>Kelola Master Data Sekolah</h3>
-                    <p class="text-xs text-slate-400 mb-4">Pengaturan data Guru, Siswa, Mapel, dan Jadwal Pelajaran (Khusus Akses Admin).</p>
+                    <h3 class="text-base font-semibold text-white mb-2"><i class="fa-solid fa-database mr-2 text-purple-400"></i>Kelola Master Data Sekolah</h3>
+                    <p class="text-xs text-slate-400 mb-6">Data terstruktur Guru, Mata Pelajaran, dan Kelas (Khusus Akses Admin).</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Tabel Master Guru -->
+                        <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+                            <h4 class="text-xs font-bold text-slate-200 mb-3 uppercase tracking-wider">Daftar Guru & Staf</h4>
+                            <ul id="masterGuruList" class="space-y-2 text-xs text-slate-300">
+                                <!-- Rendered dynamically -->
+                            </ul>
+                        </div>
+                        <!-- Tabel Master Kelas -->
+                        <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+                            <h4 class="text-xs font-bold text-slate-200 mb-3 uppercase tracking-wider">Daftar Rombongan Belajar</h4>
+                            <ul id="masterKelasList" class="space-y-2 text-xs text-slate-300">
+                                <!-- Rendered dynamically -->
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
 
+            <!-- Footer Identitas -->
             <footer class="mt-8 text-center text-xs text-slate-500 border-t border-slate-800/60 pt-4 flex justify-between items-center">
                 <span>© 2026 SI-ROLAN System | SMKS Sanjaya Bajawa</span>
                 <a href="https://wa.me/6282236008339" target="_blank" class="text-emerald-400 hover:underline flex items-center gap-1">
@@ -280,8 +362,8 @@
             </footer>
         </main>
 
-        <!-- MOBILE BOTTOM NAVIGATION -->
-        <nav class="mobile-bottom-nav fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 p-2 justify-around items-center z-50">
+        <!-- MOBILE BOTTOM NAVIGATION (MELAYANG DI HP) -->
+        <nav class="mobile-bottom-nav fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 p-2 justify-around items-center z-50">
             <button onclick="switchTab('dashboard')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white p-2">
                 <i class="fa-solid fa-chart-line text-lg"></i>
                 <span class="text-[10px]">Dashboard</span>
@@ -297,11 +379,14 @@
         </nav>
     </div>
 
-    <!-- SCRIPT FIREBASE & AUTH ENGINE -->
+    <!-- 3. FIREBASE SDK & CORE ENGINE SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // KONFIGURASI SAKLAR DEPLOYMENT FIREBASE
+        const IS_PREVIEW = false; 
 
         const firebaseConfig = {
             apiKey: "AIzaSyAuLPUMu4IPM_ihALt30TztSEE3yGH5s3k",
@@ -316,7 +401,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Validasi Akun Lokal Baku
+        // Kredensial Validasi Baku (Fallback Local Doc)
         const VALID_USERS = {
             "admin": { pass: "admin123456", role: "ADMIN", name: "Administrator" },
             "admin@sanjaya.sch.id": { pass: "admin123456", role: "ADMIN", name: "Administrator" },
@@ -326,9 +411,32 @@
             "walikelas": { pass: "wali123", role: "WALIKELAS", name: "Wali Kelas" }
         };
 
+        // State Data Lokal
         let currentUser = null;
+        let presensiLogs = [
+            { kelas: "X TKJ 1", jam: "Jam Ke-1 & 2", status: "Hadir", materi: "Bahasa Indonesia - Teks Laporan", absen: "-" },
+            { kelas: "XI TKR 1", jam: "Jam Ke-3 & 4", status: "Tugas Inval", materi: "Pemeliharaan Mesin - Tugas Mandiri", absen: "Budi (A)" }
+        ];
 
-        // --- GLOBAL FUNCTIONS DEFINITIONS ---
+        let masterGuru = ["Drs. Yohanes Loba", "Maria B. S.Pd", "Emanuel Bango, S.Kom", "Athanasius B., S.T"];
+        let masterKelas = ["X TKJ 1", "X TKJ 2", "XI TKR 1", "XII RPL 1"];
+
+        // Setup Database Otomatis jika Firestore Kosong
+        async function autoSetupDatabase() {
+            if (IS_PREVIEW) return;
+            try {
+                const querySnap = await getDocs(collection(db, "master_users"));
+                if (querySnap.empty) {
+                    for (const [username, userData] of Object.entries(VALID_USERS)) {
+                        await setDoc(doc(db, "master_users", username), userData);
+                    }
+                }
+            } catch (e) {
+                console.warn("AutoSetup Local Fallback Active:", e);
+            }
+        }
+
+        // Window Global Functions
         window.switchTab = function(tabName) {
             const tabs = ['dashboard', 'presensi', 'laporan', 'master'];
             tabs.forEach(t => {
@@ -366,6 +474,7 @@
                 masterMenu.classList.add('hidden');
             }
 
+            renderAllData();
             window.switchTab('dashboard');
         };
 
@@ -376,7 +485,63 @@
             document.getElementById('inputPassword').value = '';
         };
 
-        // --- LOGIN HANDLER ---
+        // Render Data Sampel ke Tampilan UI
+        function renderAllData() {
+            // Render Activity List
+            const actList = document.getElementById('recentActivityList');
+            actList.innerHTML = presensiLogs.map(p => `
+                <div class="p-3 bg-slate-800/40 rounded-lg border border-slate-700/40 flex justify-between items-center text-xs">
+                    <span class="text-slate-300"><i class="fa-solid fa-check text-emerald-400 mr-2"></i>${p.kelas} - ${p.status} (${p.materi})</span>
+                    <span class="text-slate-500">${p.jam}</span>
+                </div>
+            `).join('');
+
+            // Render Table Presensi
+            const tableBody = document.getElementById('tablePresensiBody');
+            tableBody.innerHTML = presensiLogs.map(p => `
+                <tr>
+                    <td class="p-3 font-semibold text-white">${p.kelas}</td>
+                    <td class="p-3 text-slate-400">${p.jam}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] ${p.status === 'Hadir' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">${p.status}</span></td>
+                    <td class="p-3 text-slate-300">${p.materi}</td>
+                    <td class="p-3 text-slate-400">${p.absen}</td>
+                </tr>
+            `).join('');
+
+            // Render Master Data
+            document.getElementById('masterGuruList').innerHTML = masterGuru.map(g => `<li class="p-2 bg-slate-800/50 rounded border border-slate-700/40"><i class="fa-solid fa-user-tie text-blue-400 mr-2"></i>${g}</li>`).join('');
+            document.getElementById('masterKelasList').innerHTML = masterKelas.map(k => `<li class="p-2 bg-slate-800/50 rounded border border-slate-700/40"><i class="fa-solid fa-door-open text-purple-400 mr-2"></i>${k}</li>`).join('');
+        }
+
+        // Form Submit Handlers
+        window.handleSavePresensi = function(e) {
+            e.preventDefault();
+            const newLog = {
+                kelas: document.getElementById('selectPresensiKelas').value,
+                jam: document.getElementById('selectJamKe').value,
+                status: document.getElementById('selectStatusGuru').value,
+                materi: document.getElementById('inputMateri').value,
+                absen: document.getElementById('inputSiswaAbsen').value || '-'
+            };
+            presensiLogs.unshift(newLog);
+            renderAllData();
+            alert("Catatan Presensi KBM Berhasil Disimpan!");
+            document.getElementById('inputMateri').value = '';
+            document.getElementById('inputSiswaAbsen').value = '';
+        };
+
+        window.handleValidasi = function(role) {
+            if (role === 'KURIKULUM') {
+                document.getElementById('statusKurikulum').innerText = "DISAHKAN (TERVALIDASI)";
+                document.getElementById('statusKurikulum').className = "font-bold text-emerald-400";
+            } else if (role === 'KEPSEK') {
+                document.getElementById('statusKepsek').innerText = "DISAHKAN (TERVALIDASI)";
+                document.getElementById('statusKepsek').className = "font-bold text-emerald-400";
+            }
+            alert(`Laporan KBM Berhasil Disahkan oleh ${role}!`);
+        };
+
+        // Submit Handler Login
         window.handleLoginSubmit = async function(e) {
             e.preventDefault();
             const userRaw = document.getElementById('inputUsername').value.trim().toLowerCase();
@@ -399,7 +564,7 @@
                         window.showDashboardUI();
                         return;
                     } catch (authErr) {
-                        console.warn("Firebase Auth fallback to local check:", authErr.code);
+                        console.warn("Firebase Auth fallback check:", authErr.code);
                     }
                 }
 
@@ -419,6 +584,20 @@
                 errorAlert.classList.remove('hidden');
             }
         };
+
+        // PWA Service Worker Registration via Dynamic Blob
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
+                self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+                self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
+            `;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(err => console.log('SW Reg Error:', err));
+        }
+
+        // Init Setup
+        autoSetupDatabase();
     </script>
 </body>
 </html>
