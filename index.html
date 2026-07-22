@@ -1,0 +1,2435 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SI-ROLAN - Sistem Informasi-Kontrol Kegiatan Pembelajaran</title>
+    
+    <!-- External Dependencies: Tailwind, FontAwesome, Chart.js, XLSX -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0265d2',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Inline Web App Manifest Data URI for PWA -->
+    <script>
+        (function() {
+            const manifest = {
+                "name": "SI-ROLAN Kontrol Kegiatan Pembelajaran",
+                "short_name": "SI-ROLAN",
+                "start_url": "./",
+                "display": "standalone",
+                "background_color": "#ffffff",
+                "theme_color": "#0369a1",
+                "icons": [
+                    {
+                        "src": "https://img.icons8.com/color/192/000000/school.png",
+                        "sizes": "192x192",
+                        "type": "image/png"
+                    },
+                    {
+                        "src": "https://img.icons8.com/color/512/000000/school.png",
+                        "sizes": "512x512",
+                        "type": "image/png"
+                    }
+                ]
+            };
+            const stringManifest = JSON.stringify(manifest);
+            const blob = new Blob([stringManifest], {type: 'application/json'});
+            const manifestUrl = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = manifestUrl;
+            document.head.appendChild(link);
+        })();
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        
+        /* Printable PDF / Print Media Styles */
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; color: black !important; }
+            .main-content { margin: 0 !important; padding: 0 !important; }
+            .shadow-lg, .shadow-md, .shadow-sm { box-shadow: none !important; }
+        }
+        .print-only { display: none; }
+    </style>
+</head>
+<body class="h-full bg-slate-100 text-slate-800 flex flex-col md:flex-row overflow-hidden">
+
+    <!-- Global Toast Alert Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Corporate Login Screen Container -->
+    <div id="login-screen" class="fixed inset-0 z-50 bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+        <div class="w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[580px] my-auto border border-slate-700/30">
+            
+            <!-- Left Hero Section (Corporate Branding & App Info) -->
+            <div class="lg:col-span-5 bg-gradient-to-br from-slate-900 via-brand-950 to-slate-900 p-6 sm:p-8 text-white flex flex-col justify-between relative overflow-hidden border-b lg:border-b-0 lg:border-r border-slate-800">
+                <div class="absolute -top-20 -left-20 w-60 h-60 bg-brand-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-20 -right-20 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="relative z-10">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div id="login-logo-badge" class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-brand-400 flex items-center justify-center font-black text-white text-2xl shadow-lg shadow-brand-500/30 overflow-hidden shrink-0">
+                            <i class="fa-solid fa-graduation-cap" id="login-logo-icon"></i>
+                            <img id="login-logo-img" src="" class="w-full h-full object-cover hidden" alt="Logo Sekolah">
+                        </div>
+                        <div>
+                            <h1 class="font-extrabold text-xl tracking-tight text-white leading-none">SI-ROLAN</h1>
+                            <p class="text-[11px] text-brand-300 font-semibold mt-1">Sistem Informasi-Kontrol Kegiatan Pembelajaran</p>
+                            <p class="text-xs font-extrabold text-amber-300 mt-1 flex items-center gap-1.5">
+                                <i class="fa-solid fa-school text-[10px] text-amber-400"></i>
+                                <span id="login-school-name">SMKS Sanjaya Bajawa</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- PEMBERITAHUAN & INFORMASI PENTING APLIKASI -->
+                    <div class="mb-4 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 backdrop-blur-md">
+                        <div class="flex items-center gap-2 text-amber-300 font-bold text-xs uppercase tracking-wider mb-1">
+                            <i class="fa-solid fa-bullhorn text-amber-400 animate-pulse"></i> Informasi Penting Sistem
+                        </div>
+                        <p class="text-[11px] text-slate-200 leading-relaxed">
+                            Aplikasi terintegrasi secara real-time antara Guru Piket, Waka Kurikulum, Wali Kelas, dan Kepala Sekolah untuk memastikan ketercapaian KBM harian tanpa jeda.
+                        </p>
+                    </div>
+
+                    <div class="space-y-3 my-4">
+                        <div class="p-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex items-start gap-3 hover:bg-white/10 transition">
+                            <div class="w-8 h-8 rounded-xl bg-brand-500/20 text-brand-300 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-xs text-white">Real-Time Class Tracking</h4>
+                                <p class="text-[11px] text-slate-300 leading-relaxed mt-0.5">Guru Piket mencatat kehadiran guru, tugas inval, & presensi siswa per jam pelajaran.</p>
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex items-start gap-3 hover:bg-white/10 transition">
+                            <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                                <i class="fa-solid fa-certificate"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-xs text-white">Validasi Digital Kurikulum</h4>
+                                <p class="text-[11px] text-slate-300 leading-relaxed mt-0.5">Pengesahan & penguncian otomatis laporan piket oleh Waka Kurikulum & Kepala Sekolah.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative z-10 text-[10px] text-slate-400 font-medium flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-slate-800">
+                        <span>&copy; 2026 SI-ROLAN System | Enterprise Edition</span>
+                        <span class="flex items-center gap-1 text-slate-300 font-semibold">
+                            by Ally Raring
+                            <a href="https://wa.me/6282236008339" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:text-emerald-300 font-bold ml-0.5 text-xs"><i class="fa-brands fa-whatsapp"></i></a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Login Form Section -->
+            <div class="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between bg-white">
+                <div>
+                    <div class="mb-5">
+                        <h2 class="text-xl font-bold text-slate-900 tracking-tight">Selamat Datang</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Silakan pilih jenis akun atau klik tombol akses cepat di bawah ini.</p>
+                    </div>
+
+                    <!-- Tab Switcher -->
+                    <div class="flex rounded-xl bg-slate-200/80 p-1 mb-3 text-xs font-bold text-slate-600">
+                        <button id="tab-btn-official" type="button" onclick="app.switchLoginTab('official')" class="flex-1 py-2 rounded-lg text-center transition bg-white text-brand-700 shadow-sm font-bold">
+                            <i class="fa-solid fa-user-shield mr-1.5"></i>Login Official
+                        </button>
+                        <button id="tab-btn-wali" type="button" onclick="app.switchLoginTab('wali')" class="flex-1 py-2 rounded-lg text-center transition hover:text-slate-900 font-bold">
+                            <i class="fa-solid fa-user-graduate mr-1.5"></i>Login Wali Kelas
+                        </button>
+                    </div>
+
+                    <!-- Tombol Akses Cepat Warna-Warni Tepat Di Bawah Tab Switcher -->
+                    <div class="mb-5 p-3.5 bg-slate-100/90 rounded-2xl border border-slate-200/80 space-y-2.5">
+                        <div id="quick-login-official-group">
+                            <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span class="flex items-center gap-1"><i class="fa-solid fa-bolt text-amber-500"></i> Akses Instan Official:</span>
+                                <span class="text-[9px] text-slate-400 font-medium">Klik untuk masuk langsung</span>
+                            </p>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                                <button type="button" onclick="app.loginAsDemoRole('u-piket')" class="py-2 px-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold text-[11px] rounded-xl shadow transition transform active:scale-95 flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-clipboard-user text-[10px]"></i>
+                                    <span>Gr. PIKET</span>
+                                </button>
+
+                                <button type="button" onclick="app.loginAsDemoRole('u-kurikulum')" class="py-2 px-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-[11px] rounded-xl shadow transition transform active:scale-95 flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-certificate text-[10px]"></i>
+                                    <span>Waka-KUR</span>
+                                </button>
+
+                                <button type="button" onclick="app.loginAsDemoRole('u-kepsek')" class="py-2 px-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold text-[11px] rounded-xl shadow transition transform active:scale-95 flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-chart-line text-[10px]"></i>
+                                    <span>Kepsek</span>
+                                </button>
+
+                                <button type="button" onclick="app.loginAsDemoRole('u-admin')" class="py-2 px-1.5 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white font-bold text-[11px] rounded-xl shadow transition transform active:scale-95 flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-sliders text-[10px]"></i>
+                                    <span>Admin</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="quick-login-wali-group" class="hidden">
+                            <p class="text-[10px] font-extrabold text-amber-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span class="flex items-center gap-1"><i class="fa-solid fa-user-graduate text-amber-500"></i> Akses Instan Wali Kelas:</span>
+                                <span class="text-[9px] text-amber-600 font-medium">Khusus Kelas X IPA 1</span>
+                            </p>
+                            <button type="button" onclick="app.loginAsDemoRole('u-walikelas')" class="w-full py-2 px-3 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold text-xs rounded-xl shadow transition transform active:scale-[0.99] flex items-center justify-between">
+                                <span class="flex items-center gap-2">
+                                    <i class="fa-solid fa-chalkboard-user"></i>
+                                    <span>Wali Kelas (X IPA 1)</span>
+                                </span>
+                                <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-md font-bold uppercase">Masuk &rarr;</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Form Login Manual -->
+                    <form onsubmit="app.handleLoginFormSubmit(event)" class="space-y-3.5">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Username / NIP / ID Pengguna</label>
+                            <div class="relative">
+                                <i class="fa-solid fa-user text-slate-400 absolute left-3.5 top-3 text-xs"></i>
+                                <input type="text" id="login-username" required placeholder="Masukkan Username / NIP" value="piket" class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-brand-500 focus:border-brand-500 bg-white">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Kata Sandi (Password)</label>
+                            <div class="relative">
+                                <i class="fa-solid fa-lock text-slate-400 absolute left-3.5 top-3 text-xs"></i>
+                                <input type="password" id="login-password" required placeholder="••••••••" value="123" class="w-full pl-9 pr-10 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-brand-500 focus:border-brand-500 bg-white">
+                                <button type="button" onclick="app.togglePasswordVisibility('login-password')" class="absolute right-3 top-2 text-slate-400 hover:text-slate-600 text-xs p-1">
+                                    <i class="fa-solid fa-eye" id="login-password-icon"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs pt-1">
+                            <label class="flex items-center gap-2 cursor-pointer font-medium text-slate-600">
+                                <input type="checkbox" checked class="rounded text-brand-600 focus:ring-brand-500 w-3.5 h-3.5">
+                                <span>Ingat Perangkat Ini</span>
+                            </label>
+                            <a href="javascript:void(0)" onclick="app.showToast('Silakan hubungi Administrator Sekolah untuk reset kata sandi.', 'info')" class="text-brand-600 font-bold hover:underline">Lupa Password?</a>
+                        </div>
+
+                        <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-700 to-brand-800 text-white font-bold text-xs rounded-xl shadow-lg shadow-brand-600/25 transition transform active:scale-[0.99] flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-right-to-bracket"></i>
+                            <span>Masuk Ke Sistem SI-ROLAN</span>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="mt-4 text-center text-[11px] text-slate-400 flex items-center justify-center gap-2 flex-wrap border-t border-slate-100 pt-3">
+                    <span>&copy; 2026 SI-ROLAN | Kontrol Kegiatan Pembelajaran</span>
+                    <span class="text-slate-300">•</span>
+                    <span class="flex items-center gap-1 text-slate-500 font-semibold">
+                        by Ally Raring
+                        <a href="https://wa.me/6282236008339" target="_blank" rel="noopener noreferrer" title="WhatsApp 082236008339" class="text-emerald-600 hover:text-emerald-700 font-bold ml-0.5"><i class="fa-brands fa-whatsapp text-xs"></i></a>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Sidebar Navigation (Desktop) -->
+    <aside id="desktop-sidebar" class="hidden md:flex flex-col w-64 bg-slate-900 text-white shrink-0 shadow-xl z-30 transition-all duration-300">
+        <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div id="sidebar-logo-badge" class="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center font-bold text-white shadow-lg text-xl overflow-hidden shrink-0">
+                    <i class="fa-solid fa-graduation-cap" id="sidebar-logo-icon"></i>
+                    <img id="sidebar-logo-img" src="" class="w-full h-full object-cover hidden" alt="Logo Sekolah">
+                </div>
+                <div>
+                    <h1 class="font-bold text-base leading-tight tracking-wide text-white">SI-ROLAN</h1>
+                    <p class="text-xs text-brand-300 font-medium">Kontrol Pembelajaran</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 bg-slate-800/60 border-b border-slate-800 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-brand-400 font-bold text-lg shrink-0" id="user-avatar-icon">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <div class="overflow-hidden flex-1">
+                <div class="text-xs font-bold text-white truncate" id="current-user-name">Memuat User...</div>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                    <span class="inline-block px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-brand-900 text-brand-200 border border-brand-700" id="current-user-role">
+                        GUEST
+                    </span>
+                    <span class="text-[9px] text-emerald-400 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-circle text-[6px]"></i> Terverifikasi
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto p-3 space-y-1" id="desktop-nav-links"></nav>
+
+        <div class="p-3 border-t border-slate-800 space-y-1">
+            <button onclick="app.showLoginScreen()" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-2 transition">
+                <i class="fa-solid fa-arrows-rotate text-brand-400"></i>
+                <span>Ganti Akun / Peran</span>
+            </button>
+            <button onclick="app.logout()" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 flex items-center gap-2 transition">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Keluar (Logout)</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Workspace Container -->
+    <div class="flex-1 flex flex-col h-full overflow-hidden relative">
+        <header class="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-sm z-20 shrink-0">
+            <div class="flex items-center gap-3">
+                <button id="mobile-menu-btn" onclick="app.showLoginScreen()" class="md:hidden text-slate-600 hover:text-slate-900 focus:outline-none p-1">
+                    <i class="fa-solid fa-user-gear text-lg"></i>
+                </button>
+                <div>
+                    <h2 class="text-sm md:text-base font-bold text-slate-800" id="page-title">Dashboard Analitik</h2>
+                    <p class="text-[11px] text-slate-500 hidden md:block" id="page-subtitle">Sistem Informasi-Kontrol Kegiatan Pembelajaran</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 md:gap-3">
+                <div class="hidden sm:flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-semibold border border-emerald-200">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="header-date-str">Senin, 22 Juli 2026</span>
+                </div>
+                
+                <button onclick="app.triggerAutoSetup()" title="Format/Reset Seed Data Database" class="p-2 text-slate-500 hover:text-brand-600 rounded-lg hover:bg-slate-100 transition text-xs font-medium flex items-center gap-1">
+                    <i class="fa-solid fa-database text-brand-500"></i>
+                    <span class="hidden lg:inline">Reset Seed Data</span>
+                </button>
+
+                <div class="md:hidden flex items-center">
+                    <span id="mobile-role-badge" class="px-2 py-1 rounded bg-brand-100 text-brand-800 text-[10px] font-bold uppercase">
+                        GUEST
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <main id="main-content-area" class="flex-1 overflow-y-auto p-3 sm:p-5 md:p-6 pb-24 md:pb-8 bg-slate-50"></main>
+
+        <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 py-2 px-2 flex justify-around items-center z-40 shadow-lg" id="mobile-bottom-nav"></nav>
+    </div>
+
+    <!-- Reusable Modal Container -->
+    <div id="app-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden transform transition-all" id="modal-content-wrapper"></div>
+    </div>
+
+    <!-- Application Script Engine -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const IS_PREVIEW = true; // Set to false when connected to production Firebase
+        
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyDemoKeyOnlyForPreviewMode123456789",
+            authDomain: "si-presisi-demo.firebaseapp.com",
+            projectId: "si-presisi-demo",
+            storageBucket: "si-presisi-demo.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef123456"
+        };
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'si-presisi-app';
+
+        // Firebase Initialization with fallback guard
+        let appFirebase = null, db = null, auth = null;
+        if (!IS_PREVIEW && firebaseConfig.apiKey !== "AIzaSyDemoKeyOnlyForPreviewMode123456789") {
+            try {
+                appFirebase = initializeApp(firebaseConfig);
+                db = getFirestore(appFirebase);
+                auth = getAuth(appFirebase);
+            } catch(e) {
+                console.warn("Firebase Init Fallback Mode Enabled:", e);
+            }
+        }
+
+        const SEED_DATA = {
+            guru: [
+                { id: 'g1', nip: '198001012005011001', nama: 'Budi Santoso, S.Pd', mapel: 'Matematika', no_hp: '08123456789' },
+                { id: 'g2', nip: '198203152008012002', nama: 'Siti Aminah, M.Pd', mapel: 'Bahasa Indonesia', no_hp: '08129876543' },
+                { id: 'g3', nip: '198507202010011003', nama: 'Dedi Kurniawan, S.Si', mapel: 'Fisika', no_hp: '08134567890' },
+                { id: 'g4', nip: '198811112014022004', nama: 'Rina Wijaya, S.Pd', mapel: 'Bahasa Inggris', no_hp: '08156789012' },
+                { id: 'g5', nip: '199002022018011005', nama: 'Eko Prasetyo, S.Kom', mapel: 'Informatika', no_hp: '08178901234' }
+            ],
+            kelas: ['X IPA 1', 'X IPA 2', 'XI IPA 1', 'XI IPA 2', 'XII IPA 1'],
+            jam_pelajaran: [
+                { jam_ke: 1, waktu: '07.00 - 07.45' },
+                { jam_ke: 2, waktu: '07.45 - 08.30' },
+                { jam_ke: 3, waktu: '08.30 - 09.15' },
+                { jam_ke: 4, waktu: '09.30 - 10.15' },
+                { jam_ke: 5, waktu: '10.15 - 11.00' },
+                { jam_ke: 6, waktu: '11.00 - 11.45' },
+                { jam_ke: 7, waktu: '12.30 - 13.15' },
+                { jam_ke: 8, waktu: '13.15 - 14.00' }
+            ],
+            mapel: [
+                { id: 'm1', kode: 'MTK', nama: 'Matematika Wajib' },
+                { id: 'm2', kode: 'BIN', nama: 'Bahasa Indonesia' },
+                { id: 'm3', kode: 'FIS', nama: 'Fisika Dasar' },
+                { id: 'm4', kode: 'BIG', nama: 'Bahasa Inggris' },
+                { id: 'm5', kode: 'INF', nama: 'Informatika & Keterampilan Digital' }
+            ],
+            siswa: [
+                { id: 's1', nisn: '0051234501', nama: 'Aditya Pratama', kelas: 'X IPA 1' },
+                { id: 's2', nisn: '0051234502', nama: 'Anisa Rahmawati', kelas: 'X IPA 1' },
+                { id: 's3', nisn: '0051234503', nama: 'Bagas Saputra', kelas: 'X IPA 1' },
+                { id: 's4', nisn: '0051234504', nama: 'Citra Dewi', kelas: 'X IPA 2' },
+                { id: 's5', nisn: '0051234505', nama: 'Dimas Anggara', kelas: 'X IPA 2' },
+                { id: 's6', nisn: '0051234506', nama: 'Eka Putri', kelas: 'XI IPA 1' },
+                { id: 's7', nisn: '0051234507', nama: 'Fajar Nugraha', kelas: 'XI IPA 1' },
+                { id: 's8', nisn: '0051234508', nama: 'Gita Gutawa', kelas: 'XI IPA 2' }
+            ],
+            users_peserta: [
+                { id: 'u-admin', username: 'admin', password: '123', nama: 'Administrator Utama', role: 'admin' },
+                { id: 'u-kepsek', username: 'kepsek', password: '123', nama: 'Dr. H. Hendra, M.Pd (Kepala Sekolah)', role: 'kepsek' },
+                { id: 'u-kurikulum', username: 'kurikulum', password: '123', nama: 'Dra. Hj. Nurhayati (Waka Kurikulum)', role: 'kurikulum' },
+                { id: 'u-piket', username: 'piket', password: '123', nama: 'Drs. H. Ahmad Fauzi (Guru Piket)', role: 'piket' },
+                { id: 'u-walikelas', username: 'walikelas', password: '123', nama: 'Siti Aminah, M.Pd (Wali Kelas X IPA 1)', role: 'walikelas', kelas_wali: 'X IPA 1' }
+            ]
+        };
+
+        let chartGuruInstance = null;
+        let chartSiswaInstance = null;
+
+        const state = {
+            isLoggedIn: false,
+            currentUser: {
+                id: 'u-piket',
+                nama: 'Drs. H. Ahmad Fauzi (Guru Piket)',
+                username: 'piket',
+                role: 'piket',
+                nip: '197805122003121001',
+                kelas_wali: 'X IPA 1'
+            },
+            config: {
+                dinas_pendidikan: 'DINAS PENDIDIKAN DAN KEBUDAYAAN PROVINSI NTT',
+                nama_sekolah: 'SMKS Sanjaya Bajawa',
+                alamat_sekolah: 'Jl. Pendidikan No. 1, Bajawa, Flores, NTT | Telp: (0384) 21001',
+                email_sekolah: 'info@smks-sanjayabajawa.sch.id',
+                kepala_sekolah: 'Dr. H. Hendra, M.Pd',
+                nip_kepala_sekolah: '197001011995031002',
+                waka_kurikulum: 'Dra. Hj. Nurhayati',
+                nip_waka_kurikulum: '197503032000032001',
+                use_image_kop: false,
+                kop_image_url: '',
+                logo_image_url: ''
+            },
+            selectedTanggal: new Date().toISOString().split('T')[0],
+            selectedJamKe: 1,
+            selectedKelasSiswa: 'X IPA 1',
+            currentMenu: 'dashboard',
+            trendPeriod: '1minggu', // '1minggu', '1bulan', '1semester', '1tahun'
+            analysisFilters: {
+                startDate: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                endDate: new Date().toISOString().split('T')[0],
+                selectedMonth: '2026-07',
+                selectedSemester: 'Ganjil',
+                selectedYear: '2026/2027'
+            },
+            studentFilterStatus: 'all', // 'all', 'Sakit', 'Izin', 'Alpha', 'Hadir'
+            data: {
+                guru: [],
+                siswa: [],
+                mapel: [],
+                kelas: [],
+                jam_pelajaran: [],
+                jadwal: [],
+                presensi_jam: [],
+                presensi_siswa: [],
+                jurnal_kbm: [],
+                users_peserta: []
+            },
+            alerts: [],
+            isCloudActive: false
+        };
+
+        // Persistent LocalStorage Storage Helpers
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('sirolan_data', JSON.stringify({
+                    presensi_jam: state.data.presensi_jam,
+                    presensi_siswa: state.data.presensi_siswa,
+                    config: state.config
+                }));
+            } catch(e) {
+                console.warn("LocalStorage save skipped:", e);
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const raw = localStorage.getItem('sirolan_data');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed.presensi_jam) state.data.presensi_jam = parsed.presensi_jam;
+                    if (parsed.presensi_siswa) state.data.presensi_siswa = parsed.presensi_siswa;
+                    if (parsed.config) state.config = { ...state.config, ...parsed.config };
+                }
+            } catch(e) {
+                console.warn("LocalStorage load skipped:", e);
+            }
+        }
+
+        function getCollectionPath(collectionName) {
+            return collection(db, 'artifacts', appId, 'public', 'data', collectionName);
+        }
+
+        function getDocPath(collectionName, documentId) {
+            return doc(db, 'artifacts', appId, 'public', 'data', collectionName, documentId);
+        }
+
+        function initPWA() {
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    self.addEventListener('install', (e) => self.skipWaiting());
+                    self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
+                    self.addEventListener('fetch', (e) => e.respondWith(fetch(e.request).catch(() => new Response('Offline'))));
+                `;
+                const blob = new Blob([swCode], { type: 'text/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl).catch(err => console.log('SW registration skipped:', err));
+            }
+        }
+
+        function runSmartEvaluationEngine() {
+            state.alerts = [];
+            const todayPresensi = state.data.presensi_jam.filter(p => p.tanggal === state.selectedTanggal);
+            
+            // 1. Teacher Absenteeism Detection
+            const absentTeachers = todayPresensi.filter(p => p.status_guru === 'Kosong' || p.status_guru === 'Inval');
+            if (absentTeachers.length >= 2) {
+                state.alerts.push({
+                    type: 'danger',
+                    icon: 'fa-triangle-exclamation',
+                    title: 'Peringatan Ketidakhadiran Guru!',
+                    message: `Terdeteksi ${absentTeachers.length} kelas mengalami kekosongan / diajar guru inval pada Jam ke-${state.selectedJamKe}. Tindakan guru inval diperlukan!`
+                });
+            }
+
+            // 2. High Student Absence Rate per Class
+            const classAbsenceMap = {};
+            state.data.presensi_siswa.forEach(s => {
+                if (s.status !== 'Hadir') {
+                    classAbsenceMap[s.kelas] = (classAbsenceMap[s.kelas] || 0) + 1;
+                }
+            });
+
+            Object.keys(classAbsenceMap).forEach(k => {
+                if (classAbsenceMap[k] >= 3) {
+                    state.alerts.push({
+                        type: 'warning',
+                        icon: 'fa-users-slash',
+                        title: `Tingkat Ketidakhadiran Tinggi di Kelas ${k}`,
+                        message: `Sebanyak ${classAbsenceMap[k]} siswa berhalangan hadir (Sakit/Izin/Alpha) di kelas ${k}. Mohon verifikasi Waka Kurikulum & Guru Piket.`
+                    });
+                }
+            });
+
+            // 3. Unvalidated Reports Alert for Waka Kurikulum
+            const pendingReports = todayPresensi.filter(p => p.status_validasi !== 'validated');
+            if (pendingReports.length > 0 && (state.currentUser.role === 'kurikulum' || state.currentUser.role === 'admin')) {
+                state.alerts.push({
+                    type: 'info',
+                    icon: 'fa-clock-rotate-left',
+                    title: 'Laporan Piket Menunggu Validasi Waka Kurikulum',
+                    message: `Terdapat ${pendingReports.length} catatan kelas jam berjalan yang perlu diverifikasi & divalidasi hari ini.`
+                });
+            }
+        }
+
+        async function autoSetupDatabase(force = false) {
+            try {
+                state.data.guru = [...SEED_DATA.guru];
+                state.data.kelas = [...SEED_DATA.kelas];
+                state.data.jam_pelajaran = [...SEED_DATA.jam_pelajaran];
+                state.data.mapel = [...SEED_DATA.mapel];
+                state.data.siswa = [...SEED_DATA.siswa];
+                state.data.users_peserta = [...SEED_DATA.users_peserta];
+
+                if (state.data.presensi_jam.length === 0) {
+                    state.data.presensi_jam = [
+                        {
+                            id: 'p-1',
+                            tanggal: state.selectedTanggal,
+                            jam_ke: 1,
+                            kelas: 'X IPA 1',
+                            guru_id: 'g1',
+                            guru_nama: 'Budi Santoso, S.Pd',
+                            mapel: 'Matematika',
+                            status_guru: 'Hadir',
+                            guru_inval: '',
+                            catatan: 'KBM Berjalan lancar',
+                            foto_url: '',
+                            status_validasi: 'validated',
+                            validated_by: 'Dra. Hj. Nurhayati',
+                            validated_at: '2026-07-22 07:30'
+                        },
+                        {
+                            id: 'p-2',
+                            tanggal: state.selectedTanggal,
+                            jam_ke: 1,
+                            kelas: 'X IPA 2',
+                            guru_id: 'g3',
+                            guru_nama: 'Dedi Kurniawan, S.Si',
+                            mapel: 'Fisika',
+                            status_guru: 'Inval',
+                            guru_inval: 'Eko Prasetyo, S.Kom',
+                            catatan: 'Guru utama izin sakit, digantikan guru inval',
+                            foto_url: '',
+                            status_validasi: 'pending',
+                            validated_by: '',
+                            validated_at: ''
+                        }
+                    ];
+                }
+
+                loadFromLocalStorage();
+
+                if (auth && auth.currentUser && !IS_PREVIEW) {
+                    for (const g of SEED_DATA.guru) {
+                        await setDoc(getDocPath('guru', g.id), g, { merge: true });
+                    }
+                    for (const s of SEED_DATA.siswa) {
+                        await setDoc(getDocPath('siswa', s.id), s, { merge: true });
+                    }
+                    for (const u of SEED_DATA.users_peserta) {
+                        await setDoc(getDocPath('users_peserta', u.id), u, { merge: true });
+                    }
+                    state.isCloudActive = true;
+                }
+
+                runSmartEvaluationEngine();
+            } catch (err) {
+                console.warn("Auto setup local mode active:", err);
+            }
+        }
+
+        const app = {
+            init: async function() {
+                initPWA();
+
+                const now = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const dateEl = document.getElementById('header-date-str');
+                if (dateEl) dateEl.textContent = now.toLocaleDateString('id-ID', options);
+
+                if (auth && !IS_PREVIEW) {
+                    try {
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else if (!auth.currentUser) {
+                            await signInAnonymously(auth);
+                        }
+                        state.isCloudActive = true;
+                    } catch (e) {
+                        console.warn("Cloud auth error, fallback to offline demo mode", e);
+                    }
+                }
+
+                await autoSetupDatabase(false);
+                this.updateLogoUI();
+                this.renderNavigation();
+                this.renderCurrentView();
+
+                if (!state.isLoggedIn) {
+                    this.showLoginScreen();
+                } else {
+                    this.hideLoginScreen();
+                }
+            },
+
+            showLoginScreen: function() {
+                const screen = document.getElementById('login-screen');
+                if (screen) {
+                    screen.classList.remove('hidden');
+                    screen.classList.add('flex');
+                }
+            },
+
+            hideLoginScreen: function() {
+                const screen = document.getElementById('login-screen');
+                if (screen) {
+                    screen.classList.add('hidden');
+                    screen.classList.remove('flex');
+                }
+            },
+
+            switchLoginTab: function(type) {
+                const officialBtn = document.getElementById('tab-btn-official');
+                const waliBtn = document.getElementById('tab-btn-wali');
+                const userInput = document.getElementById('login-username');
+                const officialGroup = document.getElementById('quick-login-official-group');
+                const waliGroup = document.getElementById('quick-login-wali-group');
+
+                if (type === 'official') {
+                    if (officialBtn) officialBtn.className = "flex-1 py-2 rounded-lg text-center transition bg-white text-brand-700 shadow-sm font-bold";
+                    if (waliBtn) waliBtn.className = "flex-1 py-2 rounded-lg text-center transition hover:text-slate-900 font-bold";
+                    if (userInput) userInput.value = "piket";
+                    if (officialGroup) officialGroup.classList.remove('hidden');
+                    if (waliGroup) waliGroup.classList.add('hidden');
+                } else {
+                    if (waliBtn) waliBtn.className = "flex-1 py-2 rounded-lg text-center transition bg-white text-brand-700 shadow-sm font-bold";
+                    if (officialBtn) officialBtn.className = "flex-1 py-2 rounded-lg text-center transition hover:text-slate-900 font-bold";
+                    if (userInput) userInput.value = "walikelas";
+                    if (officialGroup) officialGroup.classList.add('hidden');
+                    if (waliGroup) waliGroup.classList.remove('hidden');
+                }
+            },
+
+            togglePasswordVisibility: function(fieldId) {
+                const input = document.getElementById(fieldId);
+                const icon = document.getElementById(fieldId + '-icon');
+                if (input && icon) {
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.className = 'fa-solid fa-eye-slash';
+                    } else {
+                        input.type = 'password';
+                        icon.className = 'fa-solid fa-eye';
+                    }
+                }
+            },
+
+            handleLoginFormSubmit: function(e) {
+                e.preventDefault();
+                const usernameEl = document.getElementById('login-username');
+                const username = usernameEl ? usernameEl.value.trim() : '';
+                const matchedUser = SEED_DATA.users_peserta.find(u => u.username.toLowerCase() === username.toLowerCase());
+
+                if (matchedUser) {
+                    state.currentUser = { ...matchedUser };
+                    state.isLoggedIn = true;
+                    this.hideLoginScreen();
+                    this.renderNavigation();
+                    this.navigate('dashboard');
+                    this.showToast(`Selamat datang, ${matchedUser.nama}!`, 'success');
+                } else {
+                    this.showToast('Username atau password tidak ditemukan. Gunakan tombol akses instan.', 'warning');
+                }
+            },
+
+            loginAsDemoRole: function(userId) {
+                const userObj = SEED_DATA.users_peserta.find(u => u.id === userId);
+                if (userObj) {
+                    state.currentUser = { ...userObj };
+                    state.isLoggedIn = true;
+                    this.hideLoginScreen();
+                    this.renderNavigation();
+                    this.navigate('dashboard');
+                    this.showToast(`Berhasil masuk sebagai: ${userObj.nama}`, 'success');
+                }
+            },
+
+            logout: function() {
+                state.isLoggedIn = false;
+                this.showLoginScreen();
+                this.showToast('Anda telah keluar dari aplikasi.', 'info');
+            },
+
+            showToast: function(msg, type = 'info') {
+                const toast = document.createElement('div');
+                const bg = type === 'success' ? 'bg-emerald-600' : type === 'danger' ? 'bg-rose-600' : type === 'warning' ? 'bg-amber-600' : 'bg-brand-600';
+                toast.className = `${bg} text-white px-4 py-3 rounded-xl shadow-lg font-medium text-xs flex items-center justify-between gap-3 pointer-events-auto transform transition duration-300 translate-y-2 opacity-0`;
+                toast.innerHTML = `<span><i class="fa-solid fa-circle-info mr-1.5"></i>${msg}</span>
+                    <button onclick="this.parentElement.remove()" class="text-white/80 hover:text-white"><i class="fa-solid fa-xmark"></i></button>`;
+                
+                const container = document.getElementById('toast-container');
+                if (container) {
+                    container.appendChild(toast);
+                    setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
+                    setTimeout(() => {
+                        toast.classList.add('opacity-0');
+                        setTimeout(() => toast.remove(), 300);
+                    }, 4000);
+                }
+            },
+
+            renderNavigation: function() {
+                const desktopNav = document.getElementById('desktop-nav-links');
+                const mobileNav = document.getElementById('mobile-bottom-nav');
+                
+                const nameEl = document.getElementById('current-user-name');
+                if (nameEl) nameEl.textContent = state.currentUser.nama;
+                
+                const roleLabels = {
+                    'admin': 'ADMINISTRATOR',
+                    'kepsek': 'KEPALA SEKOLAH',
+                    'kurikulum': 'WAKA KURIKULUM',
+                    'piket': 'GURU PIKET',
+                    'walikelas': 'WALI KELAS'
+                };
+                const roleLabel = roleLabels[state.currentUser.role] || state.currentUser.role.toUpperCase();
+                
+                const roleEl = document.getElementById('current-user-role');
+                const mobileRoleEl = document.getElementById('mobile-role-badge');
+                if (roleEl) roleEl.textContent = roleLabel;
+                if (mobileRoleEl) mobileRoleEl.textContent = roleLabel;
+
+                const role = state.currentUser.role;
+
+                const menuItems = [
+                    { id: 'dashboard', label: 'Dashboard', icon: 'fa-chart-pie', roles: ['admin', 'kepsek', 'kurikulum', 'piket', 'walikelas'] },
+                    { id: 'deteksi_kehadiran', label: 'Analisis & Tren Evaluasi', icon: 'fa-chart-line', roles: ['admin', 'kepsek', 'kurikulum', 'piket', 'walikelas'] },
+                    { id: 'kontrol_kelas', label: 'Kontrol Jam', icon: 'fa-clipboard-check', roles: ['admin', 'kurikulum', 'piket'] },
+                    { id: 'validasi_kurikulum', label: 'Validasi Kurikulum', icon: 'fa-certificate', roles: ['admin', 'kurikulum', 'kepsek'] },
+                    { id: 'presensi_siswa', label: 'Absen Siswa', icon: 'fa-users', roles: ['admin', 'kurikulum', 'piket', 'walikelas'] },
+                    { id: 'perkembangan_wali', label: 'Progres Wali Kelas', icon: 'fa-user-graduate', roles: ['walikelas'] },
+                    { id: 'jurnal_kbm', label: 'Jurnal KBM', icon: 'fa-book-open-reader', roles: ['admin', 'kurikulum', 'walikelas'] },
+                    { id: 'import_excel', label: 'Import Excel', icon: 'fa-file-excel', roles: ['admin'] },
+                    { id: 'master_data', label: 'Data Master & Kop', icon: 'fa-database', roles: ['admin'] },
+                    { id: 'laporan_pdf', label: 'Laporan PDF', icon: 'fa-file-pdf', roles: ['admin', 'kepsek', 'kurikulum', 'piket'] }
+                ];
+
+                let desktopHtml = '';
+                let mobileHtml = '';
+
+                menuItems.forEach(item => {
+                    if (item.roles.includes(role)) {
+                        const active = state.currentMenu === item.id;
+                        const activeClass = active ? 'bg-brand-600 text-white shadow-md font-semibold' : 'text-slate-300 hover:bg-slate-800 hover:text-white';
+                        
+                        desktopHtml += `
+                            <button onclick="app.navigate('${item.id}')" class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium flex items-center gap-3 transition ${activeClass}">
+                                <i class="fa-solid ${item.icon} text-sm w-5 text-center"></i>
+                                <span>${item.label}</span>
+                            </button>
+                        `;
+
+                        const mobileActiveClass = active ? 'text-brand-600 font-bold' : 'text-slate-500 hover:text-slate-800';
+                        mobileHtml += `
+                            <button onclick="app.navigate('${item.id}')" class="flex flex-col items-center gap-0.5 text-[10px] ${mobileActiveClass}">
+                                <i class="fa-solid ${item.icon} text-base"></i>
+                                <span>${item.label}</span>
+                            </button>
+                        `;
+                    }
+                });
+
+                if (desktopNav) desktopNav.innerHTML = desktopHtml;
+                if (mobileNav) mobileNav.innerHTML = mobileHtml;
+            },
+
+            navigate: function(menuId) {
+                state.currentMenu = menuId;
+                this.renderNavigation();
+                this.renderCurrentView();
+            },
+
+            renderDashboard: function() {
+                runSmartEvaluationEngine();
+                const isWaliKelas = state.currentUser.role === 'walikelas';
+                const kelasWali = state.currentUser.kelas_wali || 'X IPA 1';
+
+                const classListToDisplay = isWaliKelas ? [kelasWali] : SEED_DATA.kelas;
+                const todayPresensi = state.data.presensi_jam.filter(p => p.tanggal === state.selectedTanggal && (!isWaliKelas || p.kelas === kelasWali));
+                
+                const countHadir = todayPresensi.filter(p => p.status_guru === 'Hadir').length;
+                const countInval = todayPresensi.filter(p => p.status_guru === 'Inval').length;
+                const countKosong = todayPresensi.filter(p => p.status_guru === 'Kosong').length;
+                const countValidated = todayPresensi.filter(p => p.status_validasi === 'validated').length;
+
+                const totalRuangKelas = isWaliKelas ? 1 : (state.data.kelas.length || 34);
+                const totalGuru = state.data.guru.length || 51;
+                const totalTendik = 9;
+                const totalSiswa = isWaliKelas ? SEED_DATA.siswa.filter(s => s.kelas === kelasWali).length : (state.data.siswa.length || 565);
+                const totalRombel = isWaliKelas ? 1 : (state.data.kelas.length || 22);
+
+                let alertSection = '';
+                if (state.alerts.length > 0) {
+                    alertSection = state.alerts.map(a => `
+                        <div class="p-4 rounded-xl ${a.type === 'danger' ? 'bg-rose-50 border-rose-200 text-rose-800' : a.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-brand-50 border-brand-200 text-brand-800'} border flex items-start gap-3 shadow-sm mb-3">
+                            <i class="fa-solid ${a.icon} text-lg mt-0.5"></i>
+                            <div>
+                                <h4 class="font-bold text-xs uppercase tracking-wider">${a.title}</h4>
+                                <p class="text-xs mt-0.5">${a.message}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    alertSection = `
+                        <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-3 shadow-sm mb-4">
+                            <i class="fa-solid fa-circle-check text-xl"></i>
+                            <div>
+                                <h4 class="font-bold text-xs uppercase tracking-wider">Kondisi KBM Normal</h4>
+                                <p class="text-xs">Seluruh kelas dan jam pelajaran terkontrol dengan baik hari ini.</p>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="space-y-6">
+                        <div>${alertSection}</div>
+
+                        <!-- KPI SUMMARY CARDS (GRADIENT STYLE) -->
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                    <i class="fa-solid fa-school-flag text-brand-600"></i> ${isWaliKelas ? `Ringkasan Data Kelas Bimbingan (${kelasWali})` : 'Ringkasan Master Data Sekolah'}
+                                </h3>
+                                <span class="text-[11px] font-medium text-slate-500">Data Terintegrasi Real-Time</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+                                <!-- Card 1: Ruang Kelas -->
+                                <div class="bg-gradient-to-br from-indigo-600 to-indigo-800 text-white p-4 rounded-2xl shadow-lg relative overflow-hidden flex items-center justify-between">
+                                    <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+                                    <div class="relative z-10">
+                                        <p class="text-[11px] font-bold text-indigo-200 uppercase tracking-wider">${isWaliKelas ? 'Kelas Terdaftar' : 'Jumlah Ruang Kelas'}</p>
+                                        <h3 class="text-3xl font-extrabold mt-1 tracking-tight">${totalRuangKelas}</h3>
+                                    </div>
+                                    <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl shrink-0 shadow-inner">
+                                        <i class="fa-solid fa-building-columns"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Card 2: Jumlah Guru -->
+                                <div class="bg-gradient-to-br from-sky-500 to-sky-700 text-white p-4 rounded-2xl shadow-lg relative overflow-hidden flex items-center justify-between">
+                                    <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+                                    <div class="relative z-10">
+                                        <p class="text-[11px] font-bold text-sky-100 uppercase tracking-wider">Jumlah Guru</p>
+                                        <h3 class="text-3xl font-extrabold mt-1 tracking-tight">${totalGuru}</h3>
+                                    </div>
+                                    <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl shrink-0 shadow-inner">
+                                        <i class="fa-solid fa-graduation-cap"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Card 3: Jumlah Tendik -->
+                                <div class="bg-gradient-to-br from-amber-500 to-orange-600 text-white p-4 rounded-2xl shadow-lg relative overflow-hidden flex items-center justify-between">
+                                    <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+                                    <div class="relative z-10">
+                                        <p class="text-[11px] font-bold text-amber-100 uppercase tracking-wider">Jumlah Tendik</p>
+                                        <h3 class="text-3xl font-extrabold mt-1 tracking-tight">${totalTendik}</h3>
+                                    </div>
+                                    <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl shrink-0 shadow-inner">
+                                        <i class="fa-solid fa-user-gear"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Card 4: Peserta Didik -->
+                                <div class="bg-gradient-to-br from-emerald-500 to-teal-700 text-white p-4 rounded-2xl shadow-lg relative overflow-hidden flex items-center justify-between">
+                                    <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+                                    <div class="relative z-10">
+                                        <p class="text-[11px] font-bold text-emerald-100 uppercase tracking-wider">${isWaliKelas ? 'Siswa di Kelas' : 'Jumlah Peserta Didik'}</p>
+                                        <h3 class="text-3xl font-extrabold mt-1 tracking-tight">${totalSiswa}</h3>
+                                    </div>
+                                    <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl shrink-0 shadow-inner">
+                                        <i class="fa-solid fa-face-smile"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Card 5: Jumlah Rombel -->
+                                <div class="bg-gradient-to-br from-pink-500 to-rose-600 text-white p-4 rounded-2xl shadow-lg relative overflow-hidden flex items-center justify-between sm:col-span-2 lg:col-span-1">
+                                    <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+                                    <div class="relative z-10">
+                                        <p class="text-[11px] font-bold text-pink-100 uppercase tracking-wider">Jumlah Rombel</p>
+                                        <h3 class="text-3xl font-extrabold mt-1 tracking-tight">${totalRombel}</h3>
+                                    </div>
+                                    <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl shrink-0 shadow-inner">
+                                        <i class="fa-solid fa-users"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- LIVE STATUS KBM HARIAN -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                                <div>
+                                    <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Guru Hadir</p>
+                                    <h3 class="text-2xl font-bold text-emerald-600 mt-1">${countHadir} Jam</h3>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-user-check"></i>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                                <div>
+                                    <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Guru Inval</p>
+                                    <h3 class="text-2xl font-bold text-amber-600 mt-1">${countInval} Jam</h3>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-user-gear"></i>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                                <div>
+                                    <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Jam Kosong</p>
+                                    <h3 class="text-2xl font-bold text-rose-600 mt-1">${countKosong} Jam</h3>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                                <div>
+                                    <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Validasi Kurikulum</p>
+                                    <h3 class="text-2xl font-bold text-brand-600 mt-1">${countValidated} Valid</h3>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-stamp"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- JAM PELAJARAN SELECTOR & GRID KELAS -->
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-regular fa-clock text-brand-600 text-lg"></i>
+                                <span class="font-bold text-slate-800 text-sm">Monitoring Jam Pelajaran Aktif:</span>
+                            </div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                ${SEED_DATA.jam_pelajaran.map(j => `
+                                    <button onclick="app.setJamKe(${j.jam_ke})" class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${state.selectedJamKe === j.jam_ke ? 'bg-brand-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">
+                                        Jam ${j.jam_ke}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                    <i class="fa-solid fa-chalkboard text-brand-600"></i> ${isWaliKelas ? `Status Kelas Bimbingan (${kelasWali})` : 'Status Seluruh Kelas'} (Jam Ke-${state.selectedJamKe})
+                                </h3>
+                                ${(state.currentUser.role === 'piket' || state.currentUser.role === 'admin') ? `
+                                    <button onclick="app.navigate('kontrol_kelas')" class="text-xs font-semibold text-brand-600 hover:underline">
+                                        Kelola Kontrol Jam <i class="fa-solid fa-arrow-right"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+
+                            <div class="grid grid-cols-1 ${isWaliKelas ? 'grid-cols-1 max-w-md' : 'md:grid-cols-2 lg:grid-cols-3'} gap-3">
+                                ${classListToDisplay.map(k => {
+                                    const record = todayPresensi.find(p => p.kelas === k && p.jam_ke === state.selectedJamKe);
+                                    const status = record ? record.status_guru : 'Belum Diisi';
+                                    const badgeBg = status === 'Hadir' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' :
+                                                    status === 'Inval' ? 'bg-amber-100 text-amber-800 border-amber-300' :
+                                                    status === 'Kosong' ? 'bg-rose-100 text-rose-800 border-rose-300' : 'bg-slate-100 text-slate-600 border-slate-300';
+                                    
+                                    return `
+                                        <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
+                                            <div>
+                                                <div class="font-bold text-slate-800 text-sm">${k}</div>
+                                                <div class="text-xs text-slate-500 mt-0.5">${record ? record.guru_nama : 'Guru belum diassign'}</div>
+                                            </div>
+                                            <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold border ${badgeBg}">
+                                                ${status}
+                                            </span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            setJamKe: function(jamKe) {
+                state.selectedJamKe = jamKe;
+                this.renderCurrentView();
+            },
+
+            renderKontrolKelas: function() {
+                const todayPresensi = state.data.presensi_jam.filter(p => p.tanggal === state.selectedTanggal && p.jam_ke === state.selectedJamKe);
+                const isPiket = state.currentUser.role === 'piket';
+                const isAdmin = state.currentUser.role === 'admin';
+                const canAccessEdit = isPiket || isAdmin;
+
+                return `
+                    <div class="space-y-5">
+                        ${!canAccessEdit ? `
+                            <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold flex items-center gap-2.5 shadow-sm">
+                                <i class="fa-solid fa-lock text-base text-amber-600"></i>
+                                <span><strong>Mode Pantau (Read-Only):</strong> Pengisian & pengubahan status kontrol jam kelas hanya dapat dilakukan oleh <strong>Guru Piket</strong>.</span>
+                            </div>
+                        ` : ''}
+
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-3">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-base">Kontrol Kehadiran Kelas (Jam Ke-${state.selectedJamKe})</h3>
+                                <p class="text-xs text-slate-500">Guru Piket mencatat status guru mengajar, inval, atau kekosongan jam berjalan secara otomatis pada hari ini.</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs font-semibold text-slate-600">Jam Ke:</label>
+                                <select onchange="app.setJamKe(parseInt(this.value))" class="px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-brand-500">
+                                    ${SEED_DATA.jam_pelajaran.map(j => `<option value="${j.jam_ke}" ${j.jam_ke === state.selectedJamKe ? 'selected' : ''}>Jam Ke-${j.jam_ke} (${j.waktu})</option>`).join('')}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${SEED_DATA.kelas.map(k => {
+                                const record = todayPresensi.find(p => p.kelas === k) || {
+                                    id: 'new-' + k,
+                                    kelas: k,
+                                    guru_id: '',
+                                    guru_nama: '',
+                                    mapel: '',
+                                    status_guru: 'Hadir',
+                                    guru_inval: '',
+                                    catatan: '',
+                                    foto_url: '',
+                                    status_validasi: 'pending'
+                                };
+
+                                const isValidated = record.status_validasi === 'validated';
+                                const isLockedForPiket = isPiket && isValidated;
+                                const isInputDisabled = !canAccessEdit || isLockedForPiket;
+
+                                return `
+                                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3 ${isValidated ? 'bg-slate-50/50' : ''}">
+                                        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                                            <span class="font-bold text-slate-900 text-base">${k}</span>
+                                            <span class="text-[10px] uppercase tracking-wider font-bold px-2.5 py-0.5 rounded-full ${isValidated ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'}">
+                                                ${isValidated ? '<i class="fa-solid fa-lock mr-1"></i> Terkunci Valid Waka' : '<i class="fa-solid fa-clock mr-1"></i> Pending'}
+                                            </span>
+                                        </div>
+
+                                        <div class="space-y-2 text-xs">
+                                            <div>
+                                                <label class="block text-slate-500 font-semibold mb-1">Guru Pengajar Utama:</label>
+                                                <select id="guru-${k}" ${isInputDisabled ? 'disabled' : ''} class="w-full p-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 disabled:bg-slate-100 disabled:text-slate-600">
+                                                    <option value="">-- Pilih Guru --</option>
+                                                    ${SEED_DATA.guru.map(g => `<option value="${g.id}" ${record.guru_id === g.id ? 'selected' : ''}>${g.nama} (${g.mapel})</option>`).join('')}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label class="block text-slate-500 font-semibold mb-1">Status Kehadiran Guru:</label>
+                                                <select id="status-${k}" ${isInputDisabled ? 'disabled' : ''} onchange="app.toggleInvalInput('${k}')" class="w-full p-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 font-bold disabled:bg-slate-100">
+                                                    <option value="Hadir" ${record.status_guru === 'Hadir' ? 'selected' : ''}>🟢 Hadir Mengajar</option>
+                                                    <option value="Inval" ${record.status_guru === 'Inval' ? 'selected' : ''}>🟡 Guru Inval (Pengganti)</option>
+                                                    <option value="Kosong" ${record.status_guru === 'Kosong' ? 'selected' : ''}>🔴 Jam Kosong / Tugas</option>
+                                                </select>
+                                            </div>
+
+                                            <div id="wrapper-inval-${k}" class="${record.status_guru === 'Inval' ? '' : 'hidden'}">
+                                                <label class="block text-amber-700 font-semibold mb-1">Nama Guru Inval (Pengganti):</label>
+                                                <input type="text" id="inval-${k}" ${isInputDisabled ? 'disabled' : ''} value="${record.guru_inval || ''}" placeholder="Masukkan Nama Guru Inval" class="w-full p-2 rounded-xl border border-amber-300 bg-amber-50 focus:ring-2 focus:ring-amber-500 disabled:opacity-75">
+                                            </div>
+
+                                            <div>
+                                                <label class="block text-slate-500 font-semibold mb-1">Catatan Kejadian Kelas:</label>
+                                                <textarea id="catatan-${k}" ${isInputDisabled ? 'disabled' : ''} placeholder="Catatan ketertiban/kejadian..." class="w-full p-2 rounded-xl border border-slate-300 h-16 resize-none focus:ring-2 focus:ring-brand-500 disabled:bg-slate-100">${record.catatan || ''}</textarea>
+                                            </div>
+                                        </div>
+
+                                        ${!isInputDisabled ? `
+                                            <button onclick="app.simpanPresensiKelas('${k}')" class="w-full py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold text-xs shadow transition flex items-center justify-center gap-2">
+                                                <i class="fa-solid fa-floppy-disk"></i> Simpan Kontrol Kelas
+                                            </button>
+                                        ` : `
+                                            <div class="py-2 px-3 text-center text-[11px] font-bold text-slate-600 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center gap-1.5">
+                                                <i class="fa-solid fa-lock text-amber-600"></i>
+                                                <span>Data Terkunci (Divalidasi Kurikulum)</span>
+                                            </div>
+                                        `}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            toggleInvalInput: function(kelas) {
+                const statusEl = document.getElementById(`status-${kelas}`);
+                const invalWrapper = document.getElementById(`wrapper-inval-${kelas}`);
+                if (statusEl && invalWrapper) {
+                    if (statusEl.value === 'Inval') {
+                        invalWrapper.classList.remove('hidden');
+                    } else {
+                        invalWrapper.classList.add('hidden');
+                    }
+                }
+            },
+
+            simpanPresensiKelas: async function(kelas) {
+                const guruEl = document.getElementById(`guru-${kelas}`);
+                const statusEl = document.getElementById(`status-${kelas}`);
+                const invalEl = document.getElementById(`inval-${kelas}`);
+                const catatanEl = document.getElementById(`catatan-${kelas}`);
+
+                const guruId = guruEl ? guruEl.value : '';
+                const statusGuru = statusEl ? statusEl.value : 'Hadir';
+                const guruInval = invalEl ? invalEl.value : '';
+                const catatan = catatanEl ? catatanEl.value : '';
+                
+                const guruObj = SEED_DATA.guru.find(g => g.id === guruId) || { nama: 'Guru Tidak Terdaftar', mapel: '-' };
+
+                const payload = {
+                    id: `p-${state.selectedTanggal}-${state.selectedJamKe}-${kelas.replace(/\s+/g, '')}`,
+                    tanggal: state.selectedTanggal,
+                    jam_ke: state.selectedJamKe,
+                    kelas: kelas,
+                    guru_id: guruId,
+                    guru_nama: guruObj.nama,
+                    mapel: guruObj.mapel,
+                    status_guru: statusGuru,
+                    guru_inval: guruInval,
+                    catatan: catatan,
+                    status_validasi: 'pending',
+                    updated_by: state.currentUser.nama,
+                    updated_at: new Date().toISOString()
+                };
+
+                state.data.presensi_jam = state.data.presensi_jam.filter(p => !(p.tanggal === payload.tanggal && p.jam_ke === payload.jam_ke && p.kelas === payload.kelas));
+                state.data.presensi_jam.push(payload);
+
+                saveToLocalStorage();
+
+                if (auth && auth.currentUser && state.isCloudActive) {
+                    try {
+                        await setDoc(getDocPath('presensi_jam', payload.id), payload, { merge: true });
+                    } catch(e) { console.error(e); }
+                }
+
+                this.showToast(`Kontrol kelas ${kelas} berhasil disimpan!`, 'success');
+                this.renderCurrentView();
+            },
+
+            renderValidasiKurikulum: function() {
+                const todayPresensi = state.data.presensi_jam.filter(p => p.tanggal === state.selectedTanggal);
+                const isKurikulum = state.currentUser.role === 'kurikulum' || state.currentUser.role === 'kepsek' || state.currentUser.role === 'admin';
+
+                return `
+                    <div class="space-y-5">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h3 class="font-extrabold text-slate-800 text-base flex items-center gap-2">
+                                    <i class="fa-solid fa-certificate text-emerald-600 text-xl"></i> Verifikasi & Validasi Laporan Piket
+                                </h3>
+                                <p class="text-xs text-slate-500">Waka Kurikulum / Kepala Sekolah mengesahkan laporan kontrol jam kelas harian.</p>
+                            </div>
+
+                            ${isKurikulum ? `
+                                <button onclick="app.validasiSemuaLaporan()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-2">
+                                    <i class="fa-solid fa-check-double"></i> Validasi Semua Catatan Hari Ini
+                                </button>
+                            ` : ''}
+                        </div>
+
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                            <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                                <span class="font-bold text-slate-800 text-xs uppercase tracking-wider">Catatan Jam Berjalan Hari Ini (${todayPresensi.length} Record)</span>
+                                <span class="text-xs text-slate-500">Tanggal: <strong>${state.selectedTanggal}</strong></span>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-100 text-slate-700 uppercase font-bold border-b border-slate-200">
+                                            <th class="p-3">Jam</th>
+                                            <th class="p-3">Kelas</th>
+                                            <th class="p-3">Guru Utama</th>
+                                            <th class="p-3">Mapel</th>
+                                            <th class="p-3">Status</th>
+                                            <th class="p-3">Guru Inval</th>
+                                            <th class="p-3">Catatan</th>
+                                            <th class="p-3">Status Validasi</th>
+                                            <th class="p-3 text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100">
+                                        ${todayPresensi.length === 0 ? `<tr><td colspan="9" class="p-6 text-center text-slate-400">Belum ada data kontrol kelas untuk hari ini.</td></tr>` : ''}
+                                        ${todayPresensi.map(p => {
+                                            const isValid = p.status_validasi === 'validated';
+                                            return `
+                                                <tr class="hover:bg-slate-50 transition">
+                                                    <td class="p-3 font-bold text-slate-800">Jam ${p.jam_ke}</td>
+                                                    <td class="p-3 font-extrabold text-brand-700">${p.kelas}</td>
+                                                    <td class="p-3 font-medium text-slate-800">${p.guru_nama}</td>
+                                                    <td class="p-3 text-slate-600">${p.mapel}</td>
+                                                    <td class="p-3 font-bold">
+                                                        <span class="px-2 py-0.5 rounded-full text-[10px] ${p.status_guru === 'Hadir' ? 'bg-emerald-100 text-emerald-800' : p.status_guru === 'Inval' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'}">
+                                                            ${p.status_guru}
+                                                        </span>
+                                                    </td>
+                                                    <td class="p-3 text-slate-600">${p.guru_inval || '-'}</td>
+                                                    <td class="p-3 text-slate-500 max-w-xs truncate">${p.catatan || '-'}</td>
+                                                    <td class="p-3">
+                                                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold border ${isValid ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-amber-100 text-amber-800 border-amber-300'}">
+                                                            ${isValid ? '<i class="fa-solid fa-circle-check mr-1"></i> Valid (Terkunci)' : '<i class="fa-solid fa-clock mr-1"></i> Pending'}
+                                                        </span>
+                                                    </td>
+                                                    <td class="p-3 text-center">
+                                                        ${isKurikulum ? (
+                                                            isValid ? `
+                                                                <button onclick="app.batalValidasiLaporan('${p.id}')" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[10px] font-bold shadow transition">
+                                                                    Buka Kunci
+                                                                </button>
+                                                            ` : `
+                                                                <button onclick="app.validasiSatuLaporan('${p.id}')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-bold shadow transition">
+                                                                    Sah & Kunci
+                                                                </button>
+                                                            `
+                                                        ) : `<span class="text-slate-400 text-[10px]">-</span>`}
+                                                    </td>
+                                                </tr>
+                                            `;
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            validasiSatuLaporan: function(id) {
+                const rec = state.data.presensi_jam.find(p => p.id === id);
+                if (rec) {
+                    rec.status_validasi = 'validated';
+                    rec.validated_by = state.currentUser.nama;
+                    rec.validated_at = new Date().toISOString();
+                    saveToLocalStorage();
+                    this.showToast(`Laporan ${rec.kelas} Jam ke-${rec.jam_ke} berhasil divalidasi & terkunci!`, 'success');
+                    this.renderCurrentView();
+                }
+            },
+
+            validasiSemuaLaporan: function() {
+                state.data.presensi_jam.forEach(p => {
+                    if (p.tanggal === state.selectedTanggal) {
+                        p.status_validasi = 'validated';
+                        p.validated_by = state.currentUser.nama;
+                        p.validated_at = new Date().toISOString();
+                    }
+                });
+                saveToLocalStorage();
+                this.showToast('Seluruh catatan piket hari ini berhasil divalidasi!', 'success');
+                this.renderCurrentView();
+            },
+
+            batalValidasiLaporan: function(id) {
+                const rec = state.data.presensi_jam.find(p => p.id === id);
+                if (rec) {
+                    rec.status_validasi = 'pending';
+                    rec.validated_by = '';
+                    rec.validated_at = '';
+                    saveToLocalStorage();
+                    this.showToast(`Validasi laporan ${rec.kelas} dibatalkan (Kunci dibuka).`, 'info');
+                    this.renderCurrentView();
+                }
+            },
+
+            setTrendPeriod: function(period) {
+                state.trendPeriod = period;
+                this.renderCurrentView();
+            },
+
+            setAnalysisFilter: function(key, value) {
+                state.analysisFilters[key] = value;
+                this.renderCurrentView();
+            },
+
+            setStudentFilterStatus: function(status) {
+                state.studentFilterStatus = status;
+                this.renderCurrentView();
+            },
+
+            renderDeteksiKehadiran: function() {
+                const todayPresensi = state.data.presensi_jam.filter(p => p.tanggal === state.selectedTanggal);
+                
+                const guruHadirCount = todayPresensi.filter(p => p.status_guru === 'Hadir').length;
+                const guruInvalCount = todayPresensi.filter(p => p.status_guru === 'Inval').length;
+                const guruKosongCount = todayPresensi.filter(p => p.status_guru === 'Kosong').length;
+                
+                const pctGuruHadir = Math.round((guruHadirCount / (todayPresensi.length || 1)) * 100);
+
+                const totalSiswa = SEED_DATA.siswa.length;
+                const logsSiswa = state.data.presensi_siswa.filter(p => p.tanggal === state.selectedTanggal);
+                const siswaAbsenCount = logsSiswa.length;
+                const siswaHadirCount = totalSiswa - siswaAbsenCount;
+                const pctSiswaHadir = Math.round((siswaHadirCount / (totalSiswa || 1)) * 100);
+
+                setTimeout(() => {
+                    this.renderChartDeteksi();
+                }, 100);
+
+                let periodControlsHtml = '';
+                if (state.trendPeriod === '1minggu') {
+                    periodControlsHtml = `
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="font-bold text-slate-600">Rentang Tanggal:</span>
+                            <input type="date" value="${state.analysisFilters.startDate}" onchange="app.setAnalysisFilter('startDate', this.value)" class="p-1.5 rounded-lg border border-slate-300 font-semibold bg-white">
+                            <span class="text-slate-400">s/d</span>
+                            <input type="date" value="${state.analysisFilters.endDate}" onchange="app.setAnalysisFilter('endDate', this.value)" class="p-1.5 rounded-lg border border-slate-300 font-semibold bg-white">
+                        </div>
+                    `;
+                } else if (state.trendPeriod === '1bulan') {
+                    periodControlsHtml = `
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="font-bold text-slate-600">Pilih Bulan:</span>
+                            <input type="month" value="${state.analysisFilters.selectedMonth}" onchange="app.setAnalysisFilter('selectedMonth', this.value)" class="p-1.5 rounded-lg border border-slate-300 font-bold bg-white">
+                        </div>
+                    `;
+                } else if (state.trendPeriod === '1semester') {
+                    periodControlsHtml = `
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="font-bold text-slate-600">Pilih Semester:</span>
+                            <select onchange="app.setAnalysisFilter('selectedSemester', this.value)" class="p-1.5 rounded-lg border border-slate-300 font-bold bg-white">
+                                <option value="Ganjil" ${state.analysisFilters.selectedSemester === 'Ganjil' ? 'selected' : ''}>Semester Ganjil (T.A. 2026/2027)</option>
+                                <option value="Genap" ${state.analysisFilters.selectedSemester === 'Genap' ? 'selected' : ''}>Semester Genap (T.A. 2026/2027)</option>
+                            </select>
+                        </div>
+                    `;
+                } else if (state.trendPeriod === '1tahun') {
+                    periodControlsHtml = `
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="font-bold text-slate-600">Tahun Ajaran (Otomatis 2 Semester):</span>
+                            <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-lg font-extrabold border border-purple-200">
+                                <i class="fa-solid fa-calendar-days mr-1"></i> T.A. 2026/2027 (Ganjil & Genap)
+                            </span>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="space-y-5">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                                <div>
+                                    <h3 class="font-extrabold text-slate-800 text-base flex items-center gap-2">
+                                        <i class="fa-solid fa-chart-line text-brand-600 text-xl"></i> Evaluasi Prosentase Kehadiran Berkelanjutan
+                                    </h3>
+                                    <p class="text-xs text-slate-500">Grafik tren akumulasi ketidakhadiran & kehadiran guru dan siswa untuk Wali Kelas, Piket, Waka Kurikulum, & Kepala Sekolah.</p>
+                                </div>
+                                
+                                <div class="flex items-center rounded-xl bg-slate-100 p-1 border border-slate-200 text-xs font-bold text-slate-600 flex-wrap gap-1">
+                                    <button onclick="app.setTrendPeriod('1minggu')" class="px-3 py-1.5 rounded-lg transition ${state.trendPeriod === '1minggu' ? 'bg-brand-600 text-white shadow' : 'hover:text-slate-900'}">
+                                        1 Minggu
+                                    </button>
+                                    <button onclick="app.setTrendPeriod('1bulan')" class="px-3 py-1.5 rounded-lg transition ${state.trendPeriod === '1bulan' ? 'bg-brand-600 text-white shadow' : 'hover:text-slate-900'}">
+                                        1 Bulan
+                                    </button>
+                                    <button onclick="app.setTrendPeriod('1semester')" class="px-3 py-1.5 rounded-lg transition ${state.trendPeriod === '1semester' ? 'bg-brand-600 text-white shadow' : 'hover:text-slate-900'}">
+                                        1 Semester
+                                    </button>
+                                    <button onclick="app.setTrendPeriod('1tahun')" class="px-3 py-1.5 rounded-lg transition ${state.trendPeriod === '1tahun' ? 'bg-purple-600 text-white shadow' : 'hover:text-slate-900'}">
+                                        1 Tahun (2 Sem)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between flex-wrap gap-3">
+                                ${periodControlsHtml}
+                                <span class="text-[11px] font-semibold text-slate-500">Mode Analisis: <strong class="text-brand-700 uppercase">${state.trendPeriod}</strong></span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                                <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Kehadiran Guru (Hari Ini)</p>
+                                <h2 class="text-3xl font-extrabold text-emerald-600 mt-1">${pctGuruHadir}%</h2>
+                                <p class="text-[11px] text-slate-500 mt-1">${guruHadirCount} Hadir | ${guruInvalCount} Inval | ${guruKosongCount} Kosong</p>
+                            </div>
+
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                                <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Kehadiran Siswa (Hari Ini)</p>
+                                <h2 class="text-3xl font-extrabold text-brand-600 mt-1">${pctSiswaHadir}%</h2>
+                                <p class="text-[11px] text-slate-500 mt-1">${siswaHadirCount} Hadir dari Total ${totalSiswa} Siswa</p>
+                            </div>
+
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                                <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Periode Evaluasi Aktif</p>
+                                <h2 class="text-2xl font-extrabold text-purple-600 mt-1 uppercase">${state.trendPeriod === '1minggu' ? '1 Minggu' : state.trendPeriod === '1bulan' ? '1 Bulan' : state.trendPeriod === '1semester' ? '1 Semester' : '1 Tahun (2 Sem)'}</h2>
+                                <p class="text-[11px] text-slate-500 mt-1">Status Penyimpanan: Local & Cloud Active</p>
+                            </div>
+
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                                <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Status Validasi Laporan</p>
+                                <h2 class="text-2xl font-extrabold text-emerald-600 mt-1 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-lock text-emerald-500 text-lg"></i> Lock Auto
+                                </h2>
+                                <p class="text-[11px] text-slate-500 mt-1">Data sah otomatis terkunci di Guru Piket</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                                <div class="flex items-center justify-between border-b pb-2">
+                                    <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                        <i class="fa-solid fa-chart-line text-brand-600"></i> Tren Kehadiran Guru (${state.trendPeriod === '1minggu' ? '1 Minggu' : state.trendPeriod === '1bulan' ? '1 Bulan' : state.trendPeriod === '1semester' ? '1 Semester' : '1 Tahun'})
+                                    </h4>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-brand-50 text-brand-700">% Terjaga</span>
+                                </div>
+                                <div class="h-64 flex items-center justify-center relative">
+                                    <canvas id="chartGuruCanvas"></canvas>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                                <div class="flex items-center justify-between border-b pb-2">
+                                    <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                        <i class="fa-solid fa-chart-area text-emerald-600"></i> Tren Kehadiran Siswa (${state.trendPeriod === '1minggu' ? '1 Minggu' : state.trendPeriod === '1bulan' ? '1 Bulan' : state.trendPeriod === '1semester' ? '1 Semester' : '1 Tahun'})
+                                    </h4>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700">% Kehadiran</span>
+                                </div>
+                                <div class="h-64 flex items-center justify-center relative">
+                                    <canvas id="chartSiswaCanvas"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TABEL DETAIL REKAP DATA PERIODE -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between border-b pb-3">
+                                <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                    <i class="fa-solid fa-table-list text-purple-600"></i> Rincian Detail Data Rekapitulasi Periode (${state.trendPeriod.toUpperCase()})
+                                </h4>
+                                <span class="text-xs font-semibold text-slate-500">
+                                    ${state.trendPeriod === '1minggu' ? `${state.analysisFilters.startDate} s/d ${state.analysisFilters.endDate}` : state.trendPeriod === '1bulan' ? `Bulan ${state.analysisFilters.selectedMonth}` : state.trendPeriod === '1semester' ? `Semester ${state.analysisFilters.selectedSemester}` : 'T.A. 2026/2027 (Semester 1 & 2)'}
+                                </span>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-100 text-slate-700 uppercase font-bold border-b border-slate-200">
+                                            <th class="p-3">Sub-Periode / Unit</th>
+                                            <th class="p-3">% Kehadiran Guru</th>
+                                            <th class="p-3">% Kehadiran Siswa</th>
+                                            <th class="p-3">Guru Inval / Kosong</th>
+                                            <th class="p-3">Ketidakhadiran Siswa (S/I/A)</th>
+                                            <th class="p-3">Status Evaluasi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100">
+                                        ${this.generateAnalysisDetailRows()}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            generateAnalysisDetailRows: function() {
+                let rows = [];
+                if (state.trendPeriod === '1minggu') {
+                    rows = [
+                        { label: 'Senin, 17 Juli 2026', guru: '94%', siswa: '96%', inval: '1 Jam Inval', siswaAbs: '2 Sakit, 1 Alpha', status: 'Baik' },
+                        { label: 'Selasa, 18 Juli 2026', guru: '98%', siswa: '97%', inval: '0 Jam', siswaAbs: '1 Sakit', status: 'Sangat Baik' },
+                        { label: 'Rabu, 19 Juli 2026', guru: '92%', siswa: '95%', inval: '2 Jam Inval', siswaAbs: '3 Sakit, 2 Izin', status: 'Perlu Perhatian' },
+                        { label: 'Kamis, 20 Juli 2026', guru: '96%', siswa: '98%', inval: '1 Jam Inval', siswaAbs: '1 Izin', status: 'Baik' },
+                        { label: 'Jumat, 21 Juli 2026', guru: '100%', siswa: '94%', inval: '0 Jam', siswaAbs: '2 Sakit, 2 Alpha', status: 'Sangat Baik' },
+                        { label: 'Sabtu, 22 Juli 2026 (Hari Ini)', guru: '95%', siswa: '96%', inval: '1 Jam Inval', siswaAbs: '2 Sakit, 2 Alpha', status: 'Terkontrol' }
+                    ];
+                } else if (state.trendPeriod === '1bulan') {
+                    rows = [
+                        { label: 'Minggu Ke-1 (1-7 Juli)', guru: '95%', siswa: '96%', inval: '3 Jam Inval', siswaAbs: '8 Siswa', status: 'Terkontrol' },
+                        { label: 'Minggu Ke-2 (8-14 Juli)', guru: '97%', siswa: '95%', inval: '2 Jam Inval', siswaAbs: '10 Siswa', status: 'Baik' },
+                        { label: 'Minggu Ke-3 (15-21 Juli)', guru: '93%', siswa: '97%', inval: '4 Jam Inval', siswaAbs: '6 Siswa', status: 'Perlu Perhatian' },
+                        { label: 'Minggu Ke-4 (22-28 Juli)', guru: '98%', siswa: '98%', inval: '1 Jam Inval', siswaAbs: '4 Siswa', status: 'Sangat Baik' }
+                    ];
+                } else if (state.trendPeriod === '1semester') {
+                    rows = [
+                        { label: 'Bulan 1 (Juli)', guru: '96%', siswa: '95%', inval: '10 Jam Inval', siswaAbs: '28 Rekap Siswa', status: 'Baik' },
+                        { label: 'Bulan 2 (Agustus)', guru: '94%', siswa: '96%', inval: '12 Jam Inval', siswaAbs: '22 Rekap Siswa', status: 'Baik' },
+                        { label: 'Bulan 3 (September)', guru: '97%', siswa: '97%', inval: '8 Jam Inval', siswaAbs: '18 Rekap Siswa', status: 'Sangat Baik' },
+                        { label: 'Bulan 4 (Oktober)', guru: '98%', siswa: '96%', inval: '6 Jam Inval', siswaAbs: '20 Rekap Siswa', status: 'Sangat Baik' },
+                        { label: 'Bulan 5 (November)', guru: '95%', siswa: '98%', inval: '9 Jam Inval', siswaAbs: '12 Rekap Siswa', status: 'Sangat Baik' },
+                        { label: 'Bulan 6 (Desember)', guru: '99%', siswa: '98%', inval: '3 Jam Inval', siswaAbs: '10 Rekap Siswa', status: 'Sangat Baik' }
+                    ];
+                } else {
+                    rows = [
+                        { label: 'Semester 1 (Ganjil T.A. 2026/2027)', guru: '96.5%', siswa: '96.6%', inval: '48 Jam Total', siswaAbs: '110 Rekap Total', status: 'Terlampaui Target' },
+                        { label: 'Semester 2 (Genap T.A. 2026/2027)', guru: '97.2%', siswa: '97.1%', inval: '35 Jam Total', siswaAbs: '92 Rekap Total', status: 'Sangat Baik (Optimal)' }
+                    ];
+                }
+
+                return rows.map(r => `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3 font-bold text-slate-800">${r.label}</td>
+                        <td class="p-3 font-semibold text-emerald-600">${r.guru}</td>
+                        <td class="p-3 font-semibold text-brand-600">${r.siswa}</td>
+                        <td class="p-3 text-slate-600">${r.inval}</td>
+                        <td class="p-3 text-slate-600">${r.siswaAbs}</td>
+                        <td class="p-3 font-bold"><span class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300">${r.status}</span></td>
+                    </tr>
+                `).join('');
+            },
+
+            renderChartDeteksi: function() {
+                const ctxGuru = document.getElementById('chartGuruCanvas');
+                const ctxSiswa = document.getElementById('chartSiswaCanvas');
+
+                if (ctxGuru && ctxSiswa && window.Chart) {
+                    if (chartGuruInstance) chartGuruInstance.destroy();
+                    if (chartSiswaInstance) chartSiswaInstance.destroy();
+
+                    let labels = [];
+                    let dataGuruHadir = [];
+                    let dataSiswaHadir = [];
+
+                    if (state.trendPeriod === '1minggu') {
+                        labels = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                        dataGuruHadir = [94, 98, 92, 96, 100, 95];
+                        dataSiswaHadir = [96, 97, 95, 98, 94, 96];
+                    } else if (state.trendPeriod === '1bulan') {
+                        labels = ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'];
+                        dataGuruHadir = [95, 97, 93, 98];
+                        dataSiswaHadir = [96, 95, 97, 98];
+                    } else if (state.trendPeriod === '1semester') {
+                        labels = ['Bulan 1', 'Bulan 2', 'Bulan 3', 'Bulan 4', 'Bulan 5', 'Bulan 6'];
+                        dataGuruHadir = [96, 94, 97, 98, 95, 99];
+                        dataSiswaHadir = [95, 96, 97, 96, 98, 98];
+                    } else {
+                        labels = ['Sem 1 (Bln 1-3)', 'Sem 1 (Bln 4-6)', 'Sem 2 (Bln 1-3)', 'Sem 2 (Bln 4-6)'];
+                        dataGuruHadir = [95, 98, 96, 99];
+                        dataSiswaHadir = [96, 97, 97, 98];
+                    }
+
+                    chartGuruInstance = new Chart(ctxGuru, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: '% Kehadiran Guru',
+                                data: dataGuruHadir,
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                fill: true,
+                                tension: 0.3,
+                                borderWidth: 3
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: { min: 80, max: 100, ticks: { callback: v => v + '%' } }
+                            }
+                        }
+                    });
+
+                    chartSiswaInstance = new Chart(ctxSiswa, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: '% Kehadiran Siswa',
+                                data: dataSiswaHadir,
+                                borderColor: '#0284c7',
+                                backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                                fill: true,
+                                tension: 0.3,
+                                borderWidth: 3
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: { min: 80, max: 100, ticks: { callback: v => v + '%' } }
+                            }
+                        }
+                    });
+                }
+            },
+
+            renderPresensiSiswa: function() {
+                const isWaliKelas = state.currentUser.role === 'walikelas';
+                const kelasWali = state.currentUser.kelas_wali || 'X IPA 1';
+                
+                if (!state.selectedKelasSiswa) {
+                    state.selectedKelasSiswa = isWaliKelas ? kelasWali : (SEED_DATA.kelas[0] || 'X IPA 1');
+                }
+                
+                const targetKelas = isWaliKelas ? kelasWali : state.selectedKelasSiswa;
+                const siswaList = SEED_DATA.siswa.filter(s => s.kelas === targetKelas);
+                const todayLogs = state.data.presensi_siswa.filter(p => p.tanggal === state.selectedTanggal && p.kelas === targetKelas);
+
+                const countSakit = todayLogs.filter(p => p.status === 'Sakit').length;
+                const countIzin = todayLogs.filter(p => p.status === 'Izin').length;
+                const countAlpha = todayLogs.filter(p => p.status === 'Alpha').length;
+                const totalTidakHadir = countSakit + countIzin + countAlpha;
+                const totalHadir = (siswaList.length || 24) - totalTidakHadir;
+
+                let filteredSiswaList = siswaList;
+                if (state.studentFilterStatus !== 'all') {
+                    if (state.studentFilterStatus === 'Hadir') {
+                        filteredSiswaList = siswaList.filter(s => {
+                            const log = todayLogs.find(l => l.siswa_id === s.id);
+                            return !log || log.status === 'Hadir';
+                        });
+                    } else {
+                        filteredSiswaList = siswaList.filter(s => {
+                            const log = todayLogs.find(l => l.siswa_id === s.id);
+                            return log && log.status === state.studentFilterStatus;
+                        });
+                    }
+                }
+
+                return `
+                    <div class="space-y-5">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h3 class="font-extrabold text-slate-800 text-base flex items-center gap-2">
+                                    <i class="fa-solid fa-users text-brand-600 text-xl"></i> Presensi Harian Siswa
+                                </h3>
+                                <p class="text-xs text-slate-500">Pencatatan status ketidakhadiran siswa (Sakit, Izin, Alpha) untuk kelas berjalan.</p>
+                            </div>
+
+                            ${!isWaliKelas ? `
+                                <div class="flex items-center gap-2">
+                                    <label class="text-xs font-bold text-slate-600">Pilih Kelas:</label>
+                                    <select onchange="app.setSelectedKelasSiswa(this.value)" class="px-3 py-2 rounded-xl border border-slate-300 font-bold text-xs text-slate-800 focus:ring-2 focus:ring-brand-500">
+                                        ${SEED_DATA.kelas.map(k => `<option value="${k}" ${k === targetKelas ? 'selected' : ''}>Kelas ${k}</option>`).join('')}
+                                    </select>
+                                </div>
+                            ` : `
+                                <span class="px-3 py-1.5 bg-brand-100 text-brand-800 font-bold text-xs rounded-xl border border-brand-200">
+                                    Kelas ${kelasWali}
+                                </span>
+                            `}
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                            <div onclick="app.setStudentFilterStatus('Hadir')" class="bg-white p-3.5 rounded-2xl border border-emerald-200 shadow-sm hover:border-emerald-500 cursor-pointer transition ${state.studentFilterStatus === 'Hadir' ? 'ring-2 ring-emerald-500 bg-emerald-50/50' : ''}">
+                                <p class="text-[10px] font-extrabold text-emerald-700 uppercase tracking-wider">🟢 Hadir</p>
+                                <h3 class="text-2xl font-black text-emerald-700 mt-0.5">${totalHadir} <span class="text-xs font-normal text-slate-500">Siswa</span></h3>
+                                <p class="text-[9px] text-slate-400 mt-1">Klik filter siswa hadir</p>
+                            </div>
+
+                            <div onclick="app.setStudentFilterStatus('all')" class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm hover:border-slate-400 cursor-pointer transition ${state.studentFilterStatus === 'all' ? 'ring-2 ring-slate-500 bg-slate-50' : ''}">
+                                <p class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider">🔴 Tidak Hadir</p>
+                                <h3 class="text-2xl font-black text-rose-600 mt-0.5">${totalTidakHadir} <span class="text-xs font-normal text-slate-500">Siswa</span></h3>
+                                <p class="text-[9px] text-slate-400 mt-1">Total Sakit, Izin, Alpha</p>
+                            </div>
+
+                            <div onclick="app.setStudentFilterStatus('Sakit')" class="bg-white p-3.5 rounded-2xl border border-amber-200 shadow-sm hover:border-amber-500 cursor-pointer transition ${state.studentFilterStatus === 'Sakit' ? 'ring-2 ring-amber-500 bg-amber-50' : ''}">
+                                <p class="text-[10px] font-extrabold text-amber-700 uppercase tracking-wider">🟡 Sakit</p>
+                                <h3 class="text-2xl font-black text-amber-700 mt-0.5">${countSakit} <span class="text-xs font-normal text-slate-500">Siswa</span></h3>
+                                <p class="text-[9px] text-amber-600 font-semibold mt-1 flex items-center gap-1"><i class="fa-solid fa-filter"></i> Lihat Nama</p>
+                            </div>
+
+                            <div onclick="app.setStudentFilterStatus('Izin')" class="bg-white p-3.5 rounded-2xl border border-sky-200 shadow-sm hover:border-sky-500 cursor-pointer transition ${state.studentFilterStatus === 'Izin' ? 'ring-2 ring-sky-500 bg-sky-50' : ''}">
+                                <p class="text-[10px] font-extrabold text-sky-700 uppercase tracking-wider">🔵 Izin</p>
+                                <h3 class="text-2xl font-black text-sky-700 mt-0.5">${countIzin} <span class="text-xs font-normal text-slate-500">Siswa</span></h3>
+                                <p class="text-[9px] text-sky-600 font-semibold mt-1 flex items-center gap-1"><i class="fa-solid fa-filter"></i> Lihat Nama</p>
+                            </div>
+
+                            <div onclick="app.setStudentFilterStatus('Alpha')" class="bg-white p-3.5 rounded-2xl border border-rose-200 shadow-sm hover:border-rose-500 cursor-pointer transition ${state.studentFilterStatus === 'Alpha' ? 'ring-2 ring-rose-500 bg-rose-50' : ''}">
+                                <p class="text-[10px] font-extrabold text-rose-700 uppercase tracking-wider">🔴 Alpha</p>
+                                <h3 class="text-2xl font-black text-rose-700 mt-0.5">${countAlpha} <span class="text-xs font-normal text-slate-500">Siswa</span></h3>
+                                <p class="text-[9px] text-rose-600 font-semibold mt-1 flex items-center gap-1"><i class="fa-solid fa-filter"></i> Lihat Nama</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
+                            <div class="flex items-center justify-between border-b pb-3 flex-wrap gap-2">
+                                <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                    <span>Daftar Siswa - ${targetKelas}</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] bg-slate-100 text-slate-600 font-bold">${filteredSiswaList.length} Siswa Ditemukan</span>
+                                </h4>
+                                
+                                <div class="flex items-center gap-1.5 text-xs">
+                                    <span class="text-slate-500 font-semibold">Filter Tampilan:</span>
+                                    <button onclick="app.setStudentFilterStatus('all')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold ${state.studentFilterStatus === 'all' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}">Semua</button>
+                                    <button onclick="app.setStudentFilterStatus('Hadir')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold ${state.studentFilterStatus === 'Hadir' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700'}">Hadir</button>
+                                    <button onclick="app.setStudentFilterStatus('Sakit')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold ${state.studentFilterStatus === 'Sakit' ? 'bg-amber-600 text-white' : 'bg-amber-50 text-amber-700'}">Sakit (${countSakit})</button>
+                                    <button onclick="app.setStudentFilterStatus('Izin')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold ${state.studentFilterStatus === 'Izin' ? 'bg-sky-600 text-white' : 'bg-sky-50 text-sky-700'}">Izin (${countIzin})</button>
+                                    <button onclick="app.setStudentFilterStatus('Alpha')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold ${state.studentFilterStatus === 'Alpha' ? 'bg-rose-600 text-white' : 'bg-rose-50 text-rose-700'}">Alpha (${countAlpha})</button>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                ${filteredSiswaList.length === 0 ? `<div class="text-center text-xs text-slate-500 py-6">Tidak ada data siswa untuk kategori filter "${state.studentFilterStatus}".</div>` : ''}
+                                ${filteredSiswaList.map(s => {
+                                    const log = todayLogs.find(l => l.siswa_id === s.id) || { status: 'Hadir' };
+                                    return `
+                                        <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-100/50 transition">
+                                            <div>
+                                                <div class="font-bold text-slate-800 text-xs">${s.nama}</div>
+                                                <div class="text-[10px] text-slate-500">NISN: ${s.nisn} | Kelas: ${s.kelas}</div>
+                                            </div>
+
+                                            <div class="flex items-center gap-2">
+                                                <select id="status-siswa-${s.id}" class="px-3 py-1.5 rounded-xl border border-slate-300 font-bold text-xs bg-white focus:ring-2 focus:ring-brand-500">
+                                                    <option value="Hadir" ${log.status === 'Hadir' ? 'selected' : ''}>🟢 Hadir</option>
+                                                    <option value="Sakit" ${log.status === 'Sakit' ? 'selected' : ''}>🟡 Sakit</option>
+                                                    <option value="Izin" ${log.status === 'Izin' ? 'selected' : ''}>🔵 Izin</option>
+                                                    <option value="Alpha" ${log.status === 'Alpha' ? 'selected' : ''}>🔴 Alpha</option>
+                                                </select>
+                                                <button onclick="app.simpanPresensiSatuSiswa('${s.id}', '${s.nama}', '${targetKelas}')" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow transition shrink-0">
+                                                    Simpan
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            setSelectedKelasSiswa: function(kelas) {
+                state.selectedKelasSiswa = kelas;
+                this.renderCurrentView();
+            },
+
+            simpanPresensiSatuSiswa: function(siswaId, nama, kelas) {
+                const selectEl = document.getElementById(`status-siswa-${siswaId}`);
+                const status = selectEl ? selectEl.value : 'Hadir';
+
+                state.data.presensi_siswa = state.data.presensi_siswa.filter(p => !(p.tanggal === state.selectedTanggal && p.siswa_id === siswaId));
+                state.data.presensi_siswa.push({
+                    id: `ps-${state.selectedTanggal}-${siswaId}`,
+                    tanggal: state.selectedTanggal,
+                    siswa_id: siswaId,
+                    nama_siswa: nama,
+                    kelas: kelas,
+                    status: status,
+                    recorded_by: state.currentUser.nama,
+                    updated_at: new Date().toISOString()
+                });
+
+                saveToLocalStorage();
+                this.showToast(`Status presensi ${nama} (${status}) tersimpan!`, 'success');
+            },
+
+            renderPerkembanganWaliKelas: function() {
+                const kelasWali = state.currentUser.kelas_wali || 'X IPA 1';
+                const siswaDiKelas = SEED_DATA.siswa.filter(s => s.kelas === kelasWali);
+                const todayPresensiGuru = state.data.presensi_jam.filter(p => p.tanggal === state.selectedTanggal && p.kelas === kelasWali);
+                const todayPresensiSiswa = state.data.presensi_siswa.filter(p => p.kelas === kelasWali && p.tanggal === state.selectedTanggal);
+
+                return `
+                    <div class="space-y-5">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+                            <h3 class="font-extrabold text-slate-800 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-user-graduate text-brand-600 text-xl"></i> Portal Monitoring Wali Kelas (${kelasWali})
+                            </h3>
+                            <p class="text-xs text-slate-500">Pantau kehadiran guru mengajar di kelas bimbingan Anda serta rekapitulasi ketidakhadiran anak wali secara real-time.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                                <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b pb-2">
+                                    <i class="fa-solid fa-chalkboard-user text-brand-600"></i> Kehadiran Guru Mengajar di Kelas ${kelasWali}
+                                </h4>
+                                <div class="space-y-2 text-xs">
+                                    ${SEED_DATA.jam_pelajaran.map(j => {
+                                        const rec = todayPresensiGuru.find(p => p.jam_ke === j.jam_ke);
+                                        const badge = rec ? (rec.status_guru === 'Hadir' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : rec.status_guru === 'Inval' ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-rose-100 text-rose-800 border-rose-300') : 'bg-slate-100 text-slate-600';
+                                        return `
+                                            <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
+                                                <div>
+                                                    <span class="font-bold text-slate-800">Jam ${j.jam_ke} (${j.waktu}):</span>
+                                                    <span class="text-slate-600 ml-1">${rec ? rec.guru_nama : 'Belum diisi'}</span>
+                                                </div>
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${badge}">
+                                                    ${rec ? rec.status_guru : 'Belum Ada Record'}
+                                                </span>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                                <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b pb-2">
+                                    <i class="fa-solid fa-users text-emerald-600"></i> Rekapitulasi Anak Wali (${siswaDiKelas.length} Siswa)
+                                </h4>
+                                <div class="space-y-2 text-xs max-h-80 overflow-y-auto">
+                                    ${siswaDiKelas.map(s => {
+                                        const log = todayPresensiSiswa.find(p => p.siswa_id === s.id);
+                                        return `
+                                            <div class="p-2.5 rounded-xl border border-slate-200 flex items-center justify-between">
+                                                <div>
+                                                    <div class="font-bold text-slate-800">${s.nama}</div>
+                                                    <div class="text-[10px] text-slate-500">NISN: ${s.nisn}</div>
+                                                </div>
+                                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${log ? (log.status === 'Sakit' ? 'bg-amber-100 text-amber-800 border border-amber-300' : log.status === 'Izin' ? 'bg-sky-100 text-sky-800 border border-sky-300' : 'bg-rose-100 text-rose-800 border border-rose-300') : 'bg-emerald-100 text-emerald-800 border border-emerald-300'}">
+                                                    ${log ? log.status : 'Hadir'}
+                                                </span>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderImportExcel: function() {
+                return `
+                    <div class="space-y-5">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                                <div>
+                                    <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                                        <i class="fa-solid fa-file-excel text-emerald-600 text-xl"></i> Import Bulk Data Sekolah via Excel / CSV
+                                    </h3>
+                                    <p class="text-xs text-slate-500 mt-0.5">Mendukung unggah massal untuk master Guru, Siswa, dan Mata Pelajaran.</p>
+                                </div>
+                                <div class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 flex items-center gap-1.5 shrink-0">
+                                    <i class="fa-solid fa-circle-info"></i> Gunakan Template Excel yang Sesuai
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="p-4 border border-dashed border-slate-300 rounded-2xl bg-slate-50 text-center space-y-3 flex flex-col justify-between">
+                                    <div class="space-y-2">
+                                        <div class="w-10 h-10 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center mx-auto text-xl font-bold">
+                                            <i class="fa-solid fa-user-tie"></i>
+                                        </div>
+                                        <h4 class="font-bold text-xs text-slate-800">Master Data Guru</h4>
+                                        <div class="p-2 bg-white rounded-xl border border-slate-200 text-[10px] text-slate-600 text-left font-mono space-y-0.5">
+                                            <div class="font-bold text-brand-700">Header Kolom Excel:</div>
+                                            <div>nip | nama | mapel | no_hp</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-1.5 pt-2">
+                                        <button onclick="app.downloadTemplate('guru')" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow w-full transition flex items-center justify-center gap-1.5">
+                                            <i class="fa-solid fa-download"></i> Unduh Template Guru (.xlsx)
+                                        </button>
+                                        
+                                        <input type="file" accept=".xlsx, .xls, .csv" id="excel-guru" onchange="app.processExcel('guru', this)" class="hidden">
+                                        <button onclick="document.getElementById('excel-guru').click()" class="px-3 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow w-full transition flex items-center justify-center gap-1.5">
+                                            <i class="fa-solid fa-file-upload"></i> Unggah File Excel Guru
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="p-4 border border-dashed border-slate-300 rounded-2xl bg-slate-50 text-center space-y-3 flex flex-col justify-between">
+                                    <div class="space-y-2">
+                                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-xl font-bold">
+                                            <i class="fa-solid fa-user-graduate"></i>
+                                        </div>
+                                        <h4 class="font-bold text-xs text-slate-800">Master Data Siswa</h4>
+                                        <div class="p-2 bg-white rounded-xl border border-slate-200 text-[10px] text-slate-600 text-left font-mono space-y-0.5">
+                                            <div class="font-bold text-emerald-700">Header Kolom Excel:</div>
+                                            <div>nisn | nama | kelas</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-1.5 pt-2">
+                                        <button onclick="app.downloadTemplate('siswa')" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow w-full transition flex items-center justify-center gap-1.5">
+                                            <i class="fa-solid fa-download"></i> Unduh Template Siswa (.xlsx)
+                                        </button>
+                                        
+                                        <input type="file" accept=".xlsx, .xls, .csv" id="excel-siswa" onchange="app.processExcel('siswa', this)" class="hidden">
+                                        <button onclick="document.getElementById('excel-siswa').click()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow w-full transition flex items-center justify-center gap-1.5">
+                                            <i class="fa-solid fa-file-upload"></i> Unggah File Excel Siswa
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="p-4 border border-dashed border-slate-300 rounded-2xl bg-slate-50 text-center space-y-3 flex flex-col justify-between">
+                                    <div class="space-y-2">
+                                        <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mx-auto text-xl font-bold">
+                                            <i class="fa-solid fa-book"></i>
+                                        </div>
+                                        <h4 class="font-bold text-xs text-slate-800">Master Data Mapel</h4>
+                                        <div class="p-2 bg-white rounded-xl border border-slate-200 text-[10px] text-slate-600 text-left font-mono space-y-0.5">
+                                            <div class="font-bold text-purple-700">Header Kolom Excel:</div>
+                                            <div>kode | nama</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-1.5 pt-2">
+                                        <button onclick="app.downloadTemplate('mapel')" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow w-full transition flex items-center justify-center gap-1.5">
+                                            <i class="fa-solid fa-download"></i> Unduh Template Mapel (.xlsx)
+                                        </button>
+
+                                        <input type="file" accept=".xlsx, .xls, .csv" id="excel-mapel" onchange="app.processExcel('mapel', this)" class="hidden">
+                                        <button onclick="document.getElementById('excel-mapel').click()" class="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow w-full transition flex items-center justify-center gap-1.5">
+                                            <i class="fa-solid fa-file-upload"></i> Unggah File Excel Mapel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            downloadTemplate: function(type) {
+                let sampleData = [];
+                let filename = '';
+
+                if (type === 'guru') {
+                    sampleData = [
+                        { nip: '198001012005011001', nama: 'Budi Santoso, S.Pd', mapel: 'Matematika', no_hp: '08123456789' },
+                        { nip: '198203152008012002', nama: 'Siti Aminah, M.Pd', mapel: 'Bahasa Indonesia', no_hp: '08129876543' }
+                    ];
+                    filename = 'Template_Master_Guru.xlsx';
+                } else if (type === 'siswa') {
+                    sampleData = [
+                        { nisn: '0051234501', nama: 'Aditya Pratama', kelas: 'X IPA 1' },
+                        { nisn: '0051234502', nama: 'Anisa Rahmawati', kelas: 'X IPA 1' }
+                    ];
+                    filename = 'Template_Master_Siswa.xlsx';
+                } else if (type === 'mapel') {
+                    sampleData = [
+                        { kode: 'MTK', nama: 'Matematika Wajib' },
+                        { kode: 'BIN', nama: 'Bahasa Indonesia' }
+                    ];
+                    filename = 'Template_Master_Mapel.xlsx';
+                }
+
+                try {
+                    const worksheet = XLSX.utils.json_to_sheet(sampleData);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "Template");
+                    XLSX.writeFile(workbook, filename);
+                    this.showToast(`Template ${filename} berhasil diunduh!`, 'success');
+                } catch(e) {
+                    this.showToast('Gagal mengunduh template: ' + e.message, 'danger');
+                }
+            },
+
+            processExcel: function(type, input) {
+                const file = input.files ? input.files[0] : null;
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheet = workbook.SheetNames[0];
+                        const parsedJson = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
+
+                        if (parsedJson && parsedJson.length > 0) {
+                            state.data[type] = parsedJson;
+                            this.showToast(`Berhasil mengimpor ${parsedJson.length} record ${type}!`, 'success');
+                            this.renderCurrentView();
+                        } else {
+                            this.showToast('File excel kosong / format tidak valid', 'warning');
+                        }
+                    } catch(err) {
+                        this.showToast('Gagal memproses file Excel: ' + err.message, 'danger');
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            },
+
+            updateLogoUI: function() {
+                const logoUrl = state.config.logo_image_url;
+                const schoolName = state.config.nama_sekolah || 'SMKS Sanjaya Bajawa';
+
+                const loginSchoolEl = document.getElementById('login-school-name');
+                if (loginSchoolEl) loginSchoolEl.textContent = schoolName;
+                
+                const loginIcon = document.getElementById('login-logo-icon');
+                const loginImg = document.getElementById('login-logo-img');
+                if (loginIcon && loginImg) {
+                    if (logoUrl) {
+                        loginImg.src = logoUrl;
+                        loginImg.classList.remove('hidden');
+                        loginIcon.classList.add('hidden');
+                    } else {
+                        loginImg.classList.add('hidden');
+                        loginIcon.classList.remove('hidden');
+                    }
+                }
+
+                const sidebarIcon = document.getElementById('sidebar-logo-icon');
+                const sidebarImg = document.getElementById('sidebar-logo-img');
+                if (sidebarIcon && sidebarImg) {
+                    if (logoUrl) {
+                        sidebarImg.src = logoUrl;
+                        sidebarImg.classList.remove('hidden');
+                        sidebarIcon.classList.add('hidden');
+                    } else {
+                        sidebarImg.classList.add('hidden');
+                        sidebarIcon.classList.remove('hidden');
+                    }
+                }
+            },
+
+            renderMasterData: function() {
+                return `
+                    <div class="space-y-5">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-id-card text-brand-600"></i> Pengaturan Logo, Kop Sekolah & Pejabat (CRUD Admin)
+                            </h3>
+                            <p class="text-xs text-slate-500">Unggah Logo Sekolah, atur Kop Surat PDF (Format Teks atau Gambar), dan sesuaikan nama pejabat penandatangan.</p>
+
+                            <!-- UPLOAD LOGO SEKOLAH -->
+                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                                <label class="block text-xs font-bold text-slate-800"><i class="fa-solid fa-image text-brand-600"></i> Unggah Logo Resmi Sekolah (.PNG / .JPG):</label>
+                                <input type="file" accept="image/*" id="cfg-logo-file" onchange="app.handleLogoImageUpload(this)" class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-600 file:text-white hover:file:bg-brand-700">
+                                <div id="logo-preview-container" class="${state.config.logo_image_url ? '' : 'hidden'} mt-2 p-2 bg-white rounded-lg border border-slate-200 text-center flex items-center justify-center gap-3">
+                                    <span class="text-[11px] font-bold text-slate-500">Pratinjau Logo Saat Ini:</span>
+                                    <img id="logo-preview-img" src="${state.config.logo_image_url || ''}" class="h-12 w-12 object-contain rounded-lg border border-slate-200">
+                                </div>
+                            </div>
+
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
+                                <label class="block font-bold text-slate-700">Pilih Tipe Tampilan Kop Surat Laporan PDF:</label>
+                                <div class="flex items-center gap-4">
+                                    <label class="flex items-center gap-2 cursor-pointer font-semibold text-slate-700">
+                                        <input type="radio" name="kop_type" value="text" ${!state.config.use_image_kop ? 'checked' : ''} onchange="app.toggleKopType(false)" class="text-brand-600 focus:ring-brand-500">
+                                        <span>Gunakan Teks Tulis Formal (Generator Otomatis + Logo)</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer font-semibold text-slate-700">
+                                        <input type="radio" name="kop_type" value="image" ${state.config.use_image_kop ? 'checked' : ''} onchange="app.toggleKopType(true)" class="text-brand-600 focus:ring-brand-500">
+                                        <span>Gunakan Gambar Kop Utuh Sekolah (Upload Image)</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="wrapper-upload-kop" class="${state.config.use_image_kop ? '' : 'hidden'} p-4 bg-brand-50/50 rounded-xl border border-brand-200 space-y-3">
+                                <label class="block text-xs font-bold text-brand-900"><i class="fa-solid fa-file-image"></i> Unggah Gambar Kop Utuh Sekolah (.PNG / .JPG):</label>
+                                <input type="file" accept="image/*" id="cfg-kop-file" onchange="app.handleKopImageUpload(this)" class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-600 file:text-white hover:file:bg-brand-700">
+                                <div id="kop-preview-container" class="${state.config.kop_image_url ? '' : 'hidden'} mt-2 p-2 bg-white rounded-lg border border-slate-200 text-center">
+                                    <p class="text-[10px] font-bold text-slate-500 mb-1">Pratinjau Gambar Kop Saat Ini:</p>
+                                    <img id="kop-preview-img" src="${state.config.kop_image_url || ''}" class="max-h-24 mx-auto object-contain">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                                <div>
+                                    <label class="block text-slate-600 font-semibold mb-1">Dinas / Instansi Atasan:</label>
+                                    <input type="text" id="cfg-dinas" value="${state.config.dinas_pendidikan}" class="w-full p-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-600 font-semibold mb-1">Nama Resmi Sekolah:</label>
+                                    <input type="text" id="cfg-sekolah" value="${state.config.nama_sekolah}" class="w-full p-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 font-bold">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-600 font-semibold mb-1">Alamat Lengkap Sekolah:</label>
+                                    <input type="text" id="cfg-alamat" value="${state.config.alamat_sekolah}" class="w-full p-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-600 font-semibold mb-1">Email / Website Sekolah:</label>
+                                    <input type="text" id="cfg-email" value="${state.config.email_sekolah}" class="w-full p-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-600 font-semibold mb-1">Nama Kepala Sekolah:</label>
+                                    <input type="text" id="cfg-kepsek" value="${state.config.kepala_sekolah}" class="w-full p-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 font-bold">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-600 font-semibold mb-1">NIP Kepala Sekolah:</label>
+                                    <input type="text" id="cfg-nip-kepsek" value="${state.config.nip_kepala_sekolah}" class="w-full p-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-600 font-semibold mb-1">Nama Waka Kurikulum:</label>
+                                    <input type="text" id="cfg-wakakur" value="${state.config.waka_kurikulum}" class="w-full p-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 font-bold">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-600 font-semibold mb-1">NIP Waka Kurikulum:</label>
+                                    <input type="text" id="cfg-nip-wakakur" value="${state.config.nip_waka_kurikulum}" class="w-full p-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500">
+                                </div>
+                            </div>
+
+                            <button onclick="app.simpanKopConfig()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i> Simpan Pengaturan Logo, Kop & Pejabat
+                            </button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            handleLogoImageUpload: function(input) {
+                const file = input.files ? input.files[0] : null;
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    state.config.logo_image_url = e.target.result;
+                    const previewContainer = document.getElementById('logo-preview-container');
+                    const previewImg = document.getElementById('logo-preview-img');
+                    if (previewContainer && previewImg) {
+                        previewImg.src = e.target.result;
+                        previewContainer.classList.remove('hidden');
+                    }
+                    this.updateLogoUI();
+                    saveToLocalStorage();
+                    this.showToast('Logo Sekolah berhasil diunggah & diperbarui!', 'success');
+                };
+                reader.readAsDataURL(file);
+            },
+
+            toggleKopType: function(useImage) {
+                state.config.use_image_kop = useImage;
+                const wrapper = document.getElementById('wrapper-upload-kop');
+                if (wrapper) {
+                    if (useImage) {
+                        wrapper.classList.remove('hidden');
+                    } else {
+                        wrapper.classList.add('hidden');
+                    }
+                }
+            },
+
+            handleKopImageUpload: function(input) {
+                const file = input.files ? input.files[0] : null;
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    state.config.kop_image_url = e.target.result;
+                    const previewContainer = document.getElementById('kop-preview-container');
+                    const previewImg = document.getElementById('kop-preview-img');
+                    if (previewContainer && previewImg) {
+                        previewImg.src = e.target.result;
+                        previewContainer.classList.remove('hidden');
+                    }
+                    saveToLocalStorage();
+                    this.showToast('Gambar Kop Sekolah berhasil diunggah!', 'success');
+                };
+                reader.readAsDataURL(file);
+            },
+
+            simpanKopConfig: function() {
+                const dinasEl = document.getElementById('cfg-dinas');
+                const sekolahEl = document.getElementById('cfg-sekolah');
+                const alamatEl = document.getElementById('cfg-alamat');
+                const emailEl = document.getElementById('cfg-email');
+                const kepsekEl = document.getElementById('cfg-kepsek');
+                const nipKepsekEl = document.getElementById('cfg-nip-kepsek');
+                const wakakurEl = document.getElementById('cfg-wakakur');
+                const nipWakakurEl = document.getElementById('cfg-nip-wakakur');
+
+                if (dinasEl) state.config.dinas_pendidikan = dinasEl.value.trim();
+                if (sekolahEl) state.config.nama_sekolah = sekolahEl.value.trim();
+                if (alamatEl) state.config.alamat_sekolah = alamatEl.value.trim();
+                if (emailEl) state.config.email_sekolah = emailEl.value.trim();
+                if (kepsekEl) state.config.kepala_sekolah = kepsekEl.value.trim();
+                if (nipKepsekEl) state.config.nip_kepala_sekolah = nipKepsekEl.value.trim();
+                if (wakakurEl) state.config.waka_kurikulum = wakakurEl.value.trim();
+                if (nipWakakurEl) state.config.nip_waka_kurikulum = nipWakakurEl.value.trim();
+
+                saveToLocalStorage();
+                this.showToast('Pengaturan Kop, Logo & Pejabat Sekolah berhasil disimpan!', 'success');
+                this.renderCurrentView();
+            },
+
+            renderJurnalKBM: function() {
+                return `
+                    <div class="space-y-5">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+                            <h3 class="font-extrabold text-slate-800 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-book-open-reader text-brand-600 text-xl"></i> Jurnal KBM & Target Kurikulum
+                            </h3>
+                            <p class="text-xs text-slate-500">Catatan ketercapaian materi pembelajaran harian per mata pelajaran dan kelas.</p>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                            <p class="text-xs text-slate-600">Jurnal KBM harian terintegrasi dengan catatan kontrol kelas dan laporan piket harian.</p>
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderLaporanPDF: function() {
+                const todayPresensi = state.data.presensi_jam.filter(p => p.tanggal === state.selectedTanggal);
+
+                return `
+                    <div class="space-y-5">
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between no-print">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-base">Laporan Resmi Presensi & Kontrol Kegiatan Pembelajaran</h3>
+                                <p class="text-xs text-slate-500">Siap dicetak atau disimpan sebagai berkas PDF resmi sekolah.</p>
+                            </div>
+                            <button onclick="window.print()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-2">
+                                <i class="fa-solid fa-print"></i> Cetak Laporan PDF
+                            </button>
+                        </div>
+
+                        <div class="bg-white p-8 rounded-2xl border border-slate-300 shadow-lg text-slate-900 space-y-6">
+                            ${state.config.use_image_kop && state.config.kop_image_url ? `
+                                <div class="text-center border-b-2 border-slate-900 pb-3">
+                                    <img src="${state.config.kop_image_url}" alt="Kop Surat Sekolah" class="max-h-36 w-full object-contain mx-auto">
+                                </div>
+                            ` : `
+                                <div class="text-center border-b-2 border-slate-900 pb-4 flex items-center justify-center gap-4">
+                                    ${state.config.logo_image_url ? `<img src="${state.config.logo_image_url}" class="h-20 w-20 object-contain shrink-0">` : ''}
+                                    <div class="space-y-0.5 text-center flex-1">
+                                        <h2 class="font-extrabold text-xs md:text-sm uppercase tracking-wide text-slate-700">${state.config.dinas_pendidikan}</h2>
+                                        <h1 class="font-black text-lg md:text-xl uppercase tracking-wider text-slate-900">${state.config.nama_sekolah}</h1>
+                                        <p class="text-[11px] text-slate-600">${state.config.alamat_sekolah} | Email: ${state.config.email_sekolah}</p>
+                                    </div>
+                                </div>
+                            `}
+
+                            <div class="text-center space-y-1">
+                                <h3 class="font-bold text-sm uppercase underline">LAPORAN KONTROL KEGIATAN PEMBELAJARAN HARIAN</h3>
+                                <p class="text-xs text-slate-600">Tanggal: ${state.selectedTanggal}</p>
+                            </div>
+
+                            <table class="w-full text-left text-xs border-collapse border border-slate-400">
+                                <thead>
+                                    <tr class="bg-slate-100 text-slate-800 uppercase font-bold border-b border-slate-400">
+                                        <th class="p-2 border border-slate-400">Jam</th>
+                                        <th class="p-2 border border-slate-400">Kelas</th>
+                                        <th class="p-2 border border-slate-400">Guru Utama</th>
+                                        <th class="p-2 border border-slate-400">Mata Pelajaran</th>
+                                        <th class="p-2 border border-slate-400">Status</th>
+                                        <th class="p-2 border border-slate-400">Guru Inval</th>
+                                        <th class="p-2 border border-slate-400">Validasi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${todayPresensi.length === 0 ? `<tr><td colspan="7" class="p-4 text-center text-slate-400">Belum ada catatan jam berjalan hari ini.</td></tr>` : ''}
+                                    ${todayPresensi.map(p => `
+                                        <tr>
+                                            <td class="p-2 border border-slate-400 font-semibold">${p.jam_ke}</td>
+                                            <td class="p-2 border border-slate-400 font-bold">${p.kelas}</td>
+                                            <td class="p-2 border border-slate-400">${p.guru_nama}</td>
+                                            <td class="p-2 border border-slate-400">${p.mapel}</td>
+                                            <td class="p-2 border border-slate-400 font-bold">
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] ${p.status_guru === 'Hadir' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : p.status_guru === 'Inval' ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-rose-100 text-rose-800 border border-rose-300'}">
+                                                    ${p.status_guru}
+                                                </span>
+                                            </td>
+                                            <td class="p-2 border border-slate-400">${p.guru_inval || '-'}</td>
+                                            <td class="p-2 border border-slate-400 font-bold text-emerald-700">${p.status_validasi === 'validated' ? 'Sah (Waka Kurikulum)' : 'Pending'}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+
+                            <div class="grid grid-cols-2 gap-8 pt-8 text-center text-xs">
+                                <div>
+                                    <p>Mengetahui,</p>
+                                    <p class="font-bold mt-1">Kepala Sekolah</p>
+                                    <div class="h-16"></div>
+                                    <p class="font-bold underline">${state.config.kepala_sekolah}</p>
+                                    <p class="text-[10px] text-slate-500">NIP. ${state.config.nip_kepala_sekolah}</p>
+                                </div>
+                                <div>
+                                    <p>Diverifikasi Oleh,</p>
+                                    <p class="font-bold mt-1">Waka Kurikulum</p>
+                                    <div class="h-16"></div>
+                                    <p class="font-bold underline">${state.config.waka_kurikulum}</p>
+                                    <p class="text-[10px] text-slate-500">NIP. ${state.config.nip_waka_kurikulum}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderCurrentView: function() {
+                const mainArea = document.getElementById('main-content-area');
+                const titleEl = document.getElementById('page-title');
+                if (!mainArea) return;
+                
+                switch(state.currentMenu) {
+                    case 'dashboard':
+                        if (titleEl) titleEl.textContent = 'Dashboard Analitik & Kontrol Real-Time';
+                        mainArea.innerHTML = this.renderDashboard();
+                        break;
+                    case 'deteksi_kehadiran':
+                        if (titleEl) titleEl.textContent = 'Deteksi & Analisis Kehadiran Otomatis';
+                        mainArea.innerHTML = this.renderDeteksiKehadiran();
+                        break;
+                    case 'kontrol_kelas':
+                        if (titleEl) titleEl.textContent = 'Kontrol Kehadiran Jam Berjalan (Guru Piket)';
+                        mainArea.innerHTML = this.renderKontrolKelas();
+                        break;
+                    case 'validasi_kurikulum':
+                        if (titleEl) titleEl.textContent = 'Verifikasi & Validasi Laporan (Waka Kurikulum)';
+                        mainArea.innerHTML = this.renderValidasiKurikulum();
+                        break;
+                    case 'presensi_siswa':
+                        if (titleEl) titleEl.textContent = 'Presensi Harian Siswa';
+                        mainArea.innerHTML = this.renderPresensiSiswa();
+                        break;
+                    case 'perkembangan_wali':
+                        if (titleEl) titleEl.textContent = 'Progres & Kehadiran Kelas Bimbingan Wali';
+                        mainArea.innerHTML = this.renderPerkembanganWaliKelas();
+                        break;
+                    case 'import_excel':
+                        if (titleEl) titleEl.textContent = 'Import Data Massal via Excel/CSV';
+                        mainArea.innerHTML = this.renderImportExcel();
+                        break;
+                    case 'master_data':
+                        if (titleEl) titleEl.textContent = 'Kelola Master Data Sekolah & Kop';
+                        mainArea.innerHTML = this.renderMasterData();
+                        break;
+                    case 'jurnal_kbm':
+                        if (titleEl) titleEl.textContent = 'Jurnal Mengajar & Target Kurikulum';
+                        mainArea.innerHTML = this.renderJurnalKBM();
+                        break;
+                    case 'laporan_pdf':
+                        if (titleEl) titleEl.textContent = 'Cetak Laporan PDF Resmi';
+                        mainArea.innerHTML = this.renderLaporanPDF();
+                        break;
+                    default:
+                        mainArea.innerHTML = this.renderDashboard();
+                }
+            },
+
+            closeModal: function() {
+                const appModal = document.getElementById('app-modal');
+                if (appModal) appModal.classList.add('hidden');
+            },
+
+            triggerAutoSetup: function() {
+                autoSetupDatabase(true);
+                this.renderCurrentView();
+                this.showToast('Data seed berhasil di-reset!', 'success');
+            }
+        };
+
+        window.app = app;
+        
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            app.init();
+        } else {
+            document.addEventListener('DOMContentLoaded', () => app.init());
+        }
+    </script>
+</body>
+</html>
