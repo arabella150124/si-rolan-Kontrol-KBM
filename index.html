@@ -135,7 +135,7 @@
     <div id="mainDashboard" class="hidden min-h-screen flex flex-col md:flex-row w-full bg-slate-950">
         
         <!-- SIDEBAR DESKTOP -->
-        <aside class="desktop-sidebar w-64 bg-slate-900 border-r border-slate-800 p-4 flex-col justify-between shrink-0">
+        <aside class="desktop-sidebar w-64 bg-slate-900 border-r border-slate-800 p-4 flex flex-col justify-between shrink-0">
             <div>
                 <div class="flex items-center gap-3 pb-6 border-b border-slate-800">
                     <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
@@ -159,16 +159,16 @@
                 </div>
 
                 <nav class="mt-4 space-y-1">
-                    <button onclick="switchTab('dashboard')" class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 text-sm font-medium transition active-nav">
+                    <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 text-sm font-medium transition">
                         <i class="fa-solid fa-chart-line w-5 text-blue-400"></i> Dashboard Utama
                     </button>
-                    <button onclick="switchTab('presensi')" class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 text-sm font-medium transition">
+                    <button onclick="switchTab('presensi')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 text-sm font-medium transition">
                         <i class="fa-solid fa-clipboard-user w-5 text-emerald-400"></i> Kontrol KBM & Absen
                     </button>
-                    <button onclick="switchTab('laporan')" class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 text-sm font-medium transition">
+                    <button onclick="switchTab('laporan')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 text-sm font-medium transition">
                         <i class="fa-solid fa-file-signature w-5 text-amber-400"></i> Validasi Laporan
                     </button>
-                    <button onclick="switchTab('master')" id="menuMasterData" class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 text-sm font-medium transition">
+                    <button onclick="switchTab('master')" id="menuMasterData" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 text-sm font-medium transition">
                         <i class="fa-solid fa-database w-5 text-purple-400"></i> Master Data Sekolah
                     </button>
                 </nav>
@@ -190,7 +190,7 @@
                     <p class="text-xs text-slate-400" id="pageSubtitle">Ringkasan aktivitas pembelajaran hari ini</p>
                 </div>
                 <button onclick="handleLogout()" class="md:hidden px-3 py-1.5 bg-rose-600/20 text-rose-400 rounded-lg text-xs font-medium border border-rose-500/30">
-                    <i class="fa-solid fa-power-off"></i>
+                    <i class="fa-solid fa-power-off"></i> Logout
                 </button>
             </header>
 
@@ -301,7 +301,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAuLPUMu4IPM_ihALt30TztSEE3yGH5s3k",
@@ -328,74 +328,7 @@
 
         let currentUser = null;
 
-        // Login Handler
-        window.handleLoginSubmit = async function(e) {
-            e.preventDefault();
-            const userRaw = document.getElementById('inputUsername').value.trim().toLowerCase();
-            const passVal = document.getElementById('inputPassword').value.trim();
-            const errorAlert = document.getElementById('loginErrorAlert');
-            
-            errorAlert.classList.add('hidden');
-
-            try {
-                // Konversi input 'admin' ke format email jika perlu
-                let loginEmail = userRaw === 'admin' ? 'admin@sanjaya.sch.id' : userRaw;
-
-                // 1. Coba Otentikasi via Firebase Auth (Jika email admin)
-                if (loginEmail.includes('@')) {
-                    try {
-                        const userCred = await signInWithEmailAndPassword(auth, loginEmail, passVal);
-                        currentUser = {
-                            uid: userCred.user.uid,
-                            name: "Administrator",
-                            role: "ADMIN"
-                        };
-                        showDashboardUI();
-                        return;
-                    } catch (authErr) {
-                        console.warn("Firebase Auth fallback to local check:", authErr.code);
-                    }
-                }
-
-                // 2. Cek Akun via Validasi Baku Lokal/Firestore
-                const matchedUser = VALID_USERS[userRaw] || VALID_USERS[loginEmail];
-                if (matchedUser && matchedUser.pass === passVal) {
-                    currentUser = {
-                        uid: userRaw,
-                        name: matchedUser.name,
-                        role: matchedUser.role
-                    };
-                    showDashboardUI();
-                } else {
-                    throw new Error("Username atau Kata Sandi Salah!");
-                }
-            } catch (err) {
-                document.getElementById('loginErrorMessage').innerText = err.message || "Gagal masuk. Periksa kredensial Anda.";
-                errorAlert.classList.remove('hidden');
-            }
-        };
-
-        function showDashboardUI() {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('mainDashboard').classList.remove('hidden');
-
-            // Set Profile Header Info
-            document.getElementById('userDisplayName').innerText = currentUser.name;
-            document.getElementById('userRoleBadge').innerText = currentUser.role;
-            document.getElementById('userAvatar').innerText = currentUser.name.charAt(0);
-
-            // Tampilkan/Sembunyikan Menu Master berdasarkan Peran
-            const masterMenu = document.getElementById('menuMasterData');
-            if (currentUser.role === 'ADMIN') {
-                masterMenu.classList.remove('hidden');
-            } else {
-                masterMenu.classList.add('hidden');
-            }
-
-            // Render Tab Default (Dashboard)
-            switchTab('dashboard');
-        }
-
+        // --- GLOBAL FUNCTIONS DEFINITIONS ---
         window.switchTab = function(tabName) {
             const tabs = ['dashboard', 'presensi', 'laporan', 'master'];
             tabs.forEach(t => {
@@ -406,7 +339,6 @@
             const activeTab = document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
             if (activeTab) activeTab.classList.remove('hidden');
 
-            // Update Header Titles
             const titles = {
                 'dashboard': ['Dashboard Kontrol KBM', 'Ringkasan aktivitas pembelajaran hari ini'],
                 'presensi': ['Kontrol KBM & Absensi', 'Pencatatan jam KBM dan kehadiran siswa'],
@@ -419,11 +351,73 @@
             }
         };
 
+        window.showDashboardUI = function() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainDashboard').classList.remove('hidden');
+
+            document.getElementById('userDisplayName').innerText = currentUser.name;
+            document.getElementById('userRoleBadge').innerText = currentUser.role;
+            document.getElementById('userAvatar').innerText = currentUser.name.charAt(0);
+
+            const masterMenu = document.getElementById('menuMasterData');
+            if (currentUser.role === 'ADMIN') {
+                masterMenu.classList.remove('hidden');
+            } else {
+                masterMenu.classList.add('hidden');
+            }
+
+            window.switchTab('dashboard');
+        };
+
         window.handleLogout = function() {
             currentUser = null;
             document.getElementById('mainDashboard').classList.add('hidden');
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('inputPassword').value = '';
+        };
+
+        // --- LOGIN HANDLER ---
+        window.handleLoginSubmit = async function(e) {
+            e.preventDefault();
+            const userRaw = document.getElementById('inputUsername').value.trim().toLowerCase();
+            const passVal = document.getElementById('inputPassword').value.trim();
+            const errorAlert = document.getElementById('loginErrorAlert');
+            
+            errorAlert.classList.add('hidden');
+
+            try {
+                let loginEmail = userRaw === 'admin' ? 'admin@sanjaya.sch.id' : userRaw;
+
+                if (loginEmail.includes('@')) {
+                    try {
+                        const userCred = await signInWithEmailAndPassword(auth, loginEmail, passVal);
+                        currentUser = {
+                            uid: userCred.user.uid,
+                            name: "Administrator",
+                            role: "ADMIN"
+                        };
+                        window.showDashboardUI();
+                        return;
+                    } catch (authErr) {
+                        console.warn("Firebase Auth fallback to local check:", authErr.code);
+                    }
+                }
+
+                const matchedUser = VALID_USERS[userRaw] || VALID_USERS[loginEmail];
+                if (matchedUser && matchedUser.pass === passVal) {
+                    currentUser = {
+                        uid: userRaw,
+                        name: matchedUser.name,
+                        role: matchedUser.role
+                    };
+                    window.showDashboardUI();
+                } else {
+                    throw new Error("Username atau Kata Sandi Salah!");
+                }
+            } catch (err) {
+                document.getElementById('loginErrorMessage').innerText = err.message || "Gagal masuk. Periksa kredensial Anda.";
+                errorAlert.classList.remove('hidden');
+            }
         };
     </script>
 </body>
