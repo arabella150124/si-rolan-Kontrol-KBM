@@ -372,14 +372,14 @@
               projectId: "si-rolankbm",
               storageBucket: "si-rolankbm.firebasestorage.app",
               messagingSenderId: "288760139849",
-              appId: "1:288760139849:web:6e6b92dc9310b79c86af98",
+              appId: "1:288760139849:web:6e6b92dc9310b79c86af98"
         };
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'si-presisi-app';
 
         // Firebase Initialization with fallback guard
         let appFirebase = null, db = null, auth = null;
-        if (!IS_PREVIEW && firebaseConfig.apiKey !== "AIzaSyAuLPUMu4IPM_ihALt30TztSEE3yGH5s3k") {
+        if (!IS_PREVIEW && firebaseConfig.apiKey !== "AIzaSyDemoKeyOnlyForPreviewMode123456789") {
             try {
                 appFirebase = initializeApp(firebaseConfig);
                 db = getFirestore(appFirebase);
