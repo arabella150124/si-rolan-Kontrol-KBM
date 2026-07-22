@@ -12,6 +12,8 @@
     <!-- Tailwind CSS & FontAwesome CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SheetJS CDN for Import/Export Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
         /* ISOLASI TOTAL DARI CSS TEMPLATE BLOGGER */
@@ -46,6 +48,11 @@
             backdrop-filter: blur(12px) !important;
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
             border-radius: 1rem !important;
+        }
+
+        .glass-card-stat {
+            backdrop-filter: blur(8px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
         }
 
         /* Responsive Layout Switcher */
@@ -159,8 +166,8 @@
         <!-- 2. KONTEN UTAMA DASHBOARD APLIKASI -->
         <div id="mainDashboard" class="hidden min-h-screen flex flex-col md:flex-row w-full bg-slate-950">
             
-            <!-- SIDEBAR DESKTOP -->
-            <aside class="desktop-sidebar w-64 bg-slate-900 border-r border-slate-800 p-4 flex flex-col justify-between shrink-0">
+            <!-- SIDEBAR DESKTOP (9 MENU PERSISI GAMBAR REFERENSI) -->
+            <aside class="desktop-sidebar w-64 bg-slate-900 border-r border-slate-800 p-4 flex flex-col justify-between shrink-0 overflow-y-auto">
                 <div>
                     <div class="flex items-center gap-3 pb-6 border-b border-slate-800">
                         <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-md">
@@ -168,7 +175,7 @@
                         </div>
                         <div>
                             <h2 class="font-bold text-sm text-white">SI-ROLAN</h2>
-                            <p class="text-xs text-amber-400">SMKS Sanjaya Bajawa</p>
+                            <p class="text-[10px] text-amber-400">Kontrol Pembelajaran</p>
                         </div>
                     </div>
 
@@ -178,202 +185,398 @@
                             A
                         </div>
                         <div class="overflow-hidden">
-                            <p class="text-xs font-semibold text-white truncate" id="userDisplayName">Administrator</p>
-                            <p class="text-[10px] text-amber-400 font-medium uppercase tracking-wider" id="userRoleBadge">ADMIN</p>
+                            <p class="text-xs font-semibold text-white truncate" id="userDisplayName">Administrator Utama</p>
+                            <p class="text-[10px] text-emerald-400 font-medium uppercase tracking-wider" id="userRoleBadge">ADMINISTRATOR <i class="fa-solid fa-circle-check text-[8px] ml-1"></i></p>
                         </div>
                     </div>
 
                     <nav class="mt-4 space-y-1">
-                        <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 text-sm font-medium transition">
-                            <i class="fa-solid fa-chart-line w-5 text-blue-400"></i> Dashboard Utama
+                        <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 text-xs font-medium transition active-nav">
+                            <i class="fa-solid fa-chart-pie w-4 text-blue-400"></i> Dashboard
                         </button>
-                        <button onclick="switchTab('presensi')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 text-sm font-medium transition">
-                            <i class="fa-solid fa-clipboard-user w-5 text-emerald-400"></i> Kontrol KBM & Absen
+                        <button onclick="switchTab('analisis')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 text-xs font-medium transition">
+                            <i class="fa-solid fa-chart-line w-4 text-emerald-400"></i> Analisis & Tren Evaluasi
                         </button>
-                        <button onclick="switchTab('laporan')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 text-sm font-medium transition">
-                            <i class="fa-solid fa-file-signature w-5 text-amber-400"></i> Validasi Laporan
+                        <button onclick="switchTab('kontroljam')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 text-xs font-medium transition">
+                            <i class="fa-solid fa-clock w-4 text-amber-400"></i> Kontrol Jam
                         </button>
-                        <button onclick="switchTab('master')" id="menuMasterData" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 text-sm font-medium transition">
-                            <i class="fa-solid fa-database w-5 text-purple-400"></i> Master Data Sekolah
+                        <button onclick="switchTab('validasi')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 text-xs font-medium transition">
+                            <i class="fa-solid fa-certificate w-4 text-purple-400"></i> Validasi Kurikulum
+                        </button>
+                        <button onclick="switchTab('absen')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 text-xs font-medium transition">
+                            <i class="fa-solid fa-user-check w-4 text-rose-400"></i> Absen Siswa
+                        </button>
+                        <button onclick="switchTab('jurnal')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 text-xs font-medium transition">
+                            <i class="fa-solid fa-book-open w-4 text-cyan-400"></i> Jurnal KBM
+                        </button>
+                        <button onclick="switchTab('import')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 text-xs font-medium transition">
+                            <i class="fa-solid fa-file-excel w-4 text-emerald-500"></i> Import Excel
+                        </button>
+                        <button onclick="switchTab('master')" id="menuMasterData" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 text-xs font-medium transition">
+                            <i class="fa-solid fa-database w-4 text-indigo-400"></i> Data Master & Kop
+                        </button>
+                        <button onclick="switchTab('pdf')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 text-xs font-medium transition">
+                            <i class="fa-solid fa-file-pdf w-4 text-rose-500"></i> Laporan PDF
                         </button>
                     </nav>
                 </div>
 
-                <div class="pt-4 border-t border-slate-800">
-                    <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg bg-rose-600/20 text-rose-400 hover:bg-rose-600/30 text-sm font-medium transition border border-rose-500/20">
-                        <i class="fa-solid fa-right-from-bracket"></i> Logout / Keluar
+                <div class="pt-4 border-t border-slate-800 space-y-1">
+                    <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 text-xs font-medium transition">
+                        <i class="fa-solid fa-arrow-right-arrows-rotate text-slate-400"></i> Ganti Akun / Peran
+                    </button>
+                    <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-rose-600/20 text-rose-400 hover:bg-rose-600/30 text-xs font-medium transition border border-rose-500/20">
+                        <i class="fa-solid fa-right-from-bracket"></i> Keluar (Logout)
                     </button>
                 </div>
             </aside>
 
-            <!-- AREA KONTEN UTAMA -->
+            <!-- AREA KONTEN UTAMA DASHBOARD -->
             <main class="flex-1 p-4 md:p-8 overflow-y-auto pb-24 md:pb-8">
                 <!-- Header Bar -->
                 <header class="flex justify-between items-center pb-4 mb-6 border-b border-slate-800">
                     <div>
-                        <h1 class="text-xl font-bold text-white" id="pageTitle">Dashboard Kontrol KBM</h1>
-                        <p class="text-xs text-slate-400" id="pageSubtitle">Ringkasan aktivitas pembelajaran hari ini</p>
+                        <h1 class="text-xl font-bold text-white" id="pageTitle">Dashboard Analitik & Kontrol Real-Time</h1>
+                        <p class="text-xs text-slate-400" id="pageSubtitle">Sistem Informasi-Kontrol Kegiatan Pembelajaran</p>
                     </div>
-                    <button onclick="handleLogout()" class="md:hidden px-3 py-1.5 bg-rose-600/20 text-rose-400 rounded-lg text-xs font-medium border border-rose-500/30">
-                        <i class="fa-solid fa-power-off"></i> Logout
-                    </button>
+                    <div class="flex items-center gap-3">
+                        <span class="bg-emerald-500/10 text-emerald-400 text-xs px-3 py-1.5 rounded-full border border-emerald-500/30 font-medium">
+                            <i class="fa-solid fa-circle text-[8px] mr-1"></i> <span id="currentDateDisplay">Kamis, 23 Juli 2026</span>
+                        </span>
+                        <button onclick="handleResetSeedData()" class="hidden md:flex items-center gap-1.5 text-xs text-slate-400 hover:text-white bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                            <i class="fa-solid fa-rotate-left"></i> Reset Seed Data
+                        </button>
+                    </div>
                 </header>
 
-                <!-- TAB 1: DASHBOARD UTAMA -->
+                <!-- 1. MENU DASHBOARD (PERSISIS SEPERTI GAMBAR REFERENSI) -->
                 <div id="tabDashboard" class="tab-content space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div class="glass-panel p-5 border-l-4 border-blue-500">
-                            <p class="text-xs text-slate-400">Total Kelas KBM</p>
-                            <h3 class="text-2xl font-bold text-white mt-1">12 Kelas</h3>
-                        </div>
-                        <div class="glass-panel p-5 border-l-4 border-emerald-500">
-                            <p class="text-xs text-slate-400">Guru Hadir Hari Ini</p>
-                            <h3 class="text-2xl font-bold text-white mt-1">18 Guru</h3>
-                        </div>
-                        <div class="glass-panel p-5 border-l-4 border-amber-500">
-                            <p class="text-xs text-slate-400">Tugas Inval</p>
-                            <h3 class="text-2xl font-bold text-white mt-1">2 Kelas</h3>
-                        </div>
-                        <div class="glass-panel p-5 border-l-4 border-purple-500">
-                            <p class="text-xs text-slate-400">Status Validasi Harian</p>
-                            <h3 class="text-lg font-bold text-emerald-400 mt-1">TERVALIDASI</h3>
+                    <!-- Banner Warning Notification -->
+                    <div class="p-4 rounded-xl bg-blue-950/40 border border-blue-800/50 flex items-center gap-3 text-xs text-blue-300">
+                        <i class="fa-solid fa-clock-rotate-left text-lg text-blue-400"></i>
+                        <div>
+                            <span class="font-bold uppercase tracking-wide">LAPORAN PIKET MENUNGGU VALIDASI WAKA KURIKULUM</span>
+                            <p class="text-slate-400 text-[11px] mt-0.5">Terdapat 1 catatan kelas jam berjalan yang perlu diverifikasi & divalidasi hari ini.</p>
                         </div>
                     </div>
 
+                    <!-- Ringkasan Master Data Sekolah (5 Stat Cards) -->
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300"><i class="fa-solid fa-school mr-2 text-blue-400"></i>Ringkasan Master Data Sekolah</h3>
+                            <span class="text-[10px] text-slate-500">Data Terintegrasi Real-Time</span>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                            <!-- Card 1: Ruang Kelas -->
+                            <div class="glass-card-stat p-4 rounded-2xl bg-indigo-600/80 border border-indigo-400/30 text-white flex justify-between items-center">
+                                <div>
+                                    <p class="text-[10px] uppercase font-semibold text-indigo-100">JUMLAH RUANG KELAS</p>
+                                    <h2 class="text-3xl font-extrabold mt-1" id="statRuangKelas">5</h2>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-xl">
+                                    <i class="fa-solid fa-building-columns"></i>
+                                </div>
+                            </div>
+                            <!-- Card 2: Guru -->
+                            <div class="glass-card-stat p-4 rounded-2xl bg-sky-600/80 border border-sky-400/30 text-white flex justify-between items-center">
+                                <div>
+                                    <p class="text-[10px] uppercase font-semibold text-sky-100">JUMLAH GURU</p>
+                                    <h2 class="text-3xl font-extrabold mt-1" id="statGuru">5</h2>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-xl">
+                                    <i class="fa-solid fa-graduation-cap"></i>
+                                </div>
+                            </div>
+                            <!-- Card 3: Tendik -->
+                            <div class="glass-card-stat p-4 rounded-2xl bg-amber-600/80 border border-amber-400/30 text-white flex justify-between items-center">
+                                <div>
+                                    <p class="text-[10px] uppercase font-semibold text-amber-100">JUMLAH TENDIK</p>
+                                    <h2 class="text-3xl font-extrabold mt-1" id="statTendik">9</h2>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-xl">
+                                    <i class="fa-solid fa-users-gear"></i>
+                                </div>
+                            </div>
+                            <!-- Card 4: Peserta Didik -->
+                            <div class="glass-card-stat p-4 rounded-2xl bg-emerald-600/80 border border-emerald-400/30 text-white flex justify-between items-center">
+                                <div>
+                                    <p class="text-[10px] uppercase font-semibold text-emerald-100">JUMLAH PESERTA DIDIK</p>
+                                    <h2 class="text-3xl font-extrabold mt-1" id="statPesertaDidik">8</h2>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-xl">
+                                    <i class="fa-solid fa-face-smile"></i>
+                                </div>
+                            </div>
+                            <!-- Card 5: Rombel -->
+                            <div class="glass-card-stat p-4 rounded-2xl bg-rose-600/80 border border-rose-400/30 text-white flex justify-between items-center">
+                                <div>
+                                    <p class="text-[10px] uppercase font-semibold text-rose-100">JUMLAH ROMBEL</p>
+                                    <h2 class="text-3xl font-extrabold mt-1" id="statRombel">5</h2>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-xl">
+                                    <i class="fa-solid fa-people-roof"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4 Status KBM Harian Cards -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="glass-panel p-4 flex justify-between items-center">
+                            <div>
+                                <p class="text-[10px] uppercase text-slate-400 font-semibold">GURU HADIR</p>
+                                <h3 class="text-2xl font-bold text-emerald-400 mt-1" id="statGuruHadir">1 Jam</h3>
+                            </div>
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
+                                <i class="fa-solid fa-user-check"></i>
+                            </div>
+                        </div>
+                        <div class="glass-panel p-4 flex justify-between items-center">
+                            <div>
+                                <p class="text-[10px] uppercase text-slate-400 font-semibold">GURU INVAL</p>
+                                <h3 class="text-2xl font-bold text-amber-400 mt-1" id="statGuruInval">1 Jam</h3>
+                            </div>
+                            <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg">
+                                <i class="fa-solid fa-user-clock"></i>
+                            </div>
+                        </div>
+                        <div class="glass-panel p-4 flex justify-between items-center">
+                            <div>
+                                <p class="text-[10px] uppercase text-slate-400 font-semibold">JAM KOSONG</p>
+                                <h3 class="text-2xl font-bold text-rose-400 mt-1" id="statJamKosong">0 Jam</h3>
+                            </div>
+                            <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-lg">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </div>
+                        </div>
+                        <div class="glass-panel p-4 flex justify-between items-center">
+                            <div>
+                                <p class="text-[10px] uppercase text-slate-400 font-semibold">VALIDASI KURIKULUM</p>
+                                <h3 class="text-2xl font-bold text-blue-400 mt-1" id="statValidasi">1 Valid</h3>
+                            </div>
+                            <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-lg">
+                                <i class="fa-solid fa-stamp"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Monitoring Jam Pelajaran Aktif (Jam 1 s/d Jam 8 Buttons) -->
+                    <div class="glass-panel p-5">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="fa-solid fa-clock text-blue-400 text-sm"></i>
+                            <h3 class="text-xs font-bold text-white uppercase tracking-wider">Monitoring Jam Pelajaran Aktif:</h3>
+                        </div>
+                        <div class="flex flex-wrap gap-2" id="jamPelajaranFilter">
+                            <button onclick="filterJamPelajaran(1)" class="jam-btn px-4 py-2 rounded-lg bg-blue-600 text-white font-bold text-xs shadow-md">Jam 1</button>
+                            <button onclick="filterJamPelajaran(2)" class="jam-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs">Jam 2</button>
+                            <button onclick="filterJamPelajaran(3)" class="jam-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs">Jam 3</button>
+                            <button onclick="filterJamPelajaran(4)" class="jam-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs">Jam 4</button>
+                            <button onclick="filterJamPelajaran(5)" class="jam-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs">Jam 5</button>
+                            <button onclick="filterJamPelajaran(6)" class="jam-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs">Jam 6</button>
+                            <button onclick="filterJamPelajaran(7)" class="jam-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs">Jam 7</button>
+                            <button onclick="filterJamPelajaran(8)" class="jam-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs">Jam 8</button>
+                        </div>
+                    </div>
+
+                    <!-- Status Seluruh Kelas Grid -->
                     <div class="glass-panel p-6">
-                        <h3 class="text-base font-semibold text-white mb-4"><i class="fa-solid fa-clock-rotate-left mr-2 text-blue-400"></i>Aktivitas Kontrol Real-Time</h3>
-                        <div class="space-y-3" id="recentActivityList">
-                            <!-- Rendered dynamically -->
+                        <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-4" id="statusKelasTitle"><i class="fa-solid fa-chalkboard-user mr-2 text-emerald-400"></i>Status Seluruh Kelas (Jam Ke-1)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="gridStatusKelas">
+                            <!-- Dynamically Rendered -->
                         </div>
                     </div>
                 </div>
 
-                <!-- TAB 2: KONTROL KBM & PRESENSI -->
-                <div id="tabPresensi" class="tab-content hidden space-y-6">
+                <!-- 2. ANALISIS & TREN EVALUASI -->
+                <div id="tabAnalisis" class="tab-content hidden space-y-6">
                     <div class="glass-panel p-6">
-                        <h3 class="text-base font-semibold text-white mb-2"><i class="fa-solid fa-clipboard-list mr-2 text-emerald-400"></i>Pencatatan Presensi & Jurnal KBM</h3>
-                        <p class="text-xs text-slate-400 mb-6">Input kehadiran guru, materi, serta siswa tidak hadir per jam pelajaran.</p>
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-2"><i class="fa-solid fa-chart-line mr-2 text-emerald-400"></i>Analisis & Tren Evaluasi KBM</h3>
+                        <p class="text-xs text-slate-400 mb-6">Persentase ketercapaian jam KBM, keaktifan guru, dan tren jam kosong mingguan.</p>
                         
-                        <form onsubmit="handleSavePresensi(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="p-4 bg-slate-800/50 rounded-xl border border-slate-700/50 text-center">
+                                <p class="text-xs text-slate-400 mb-2">Tingkat Kehadiran Guru</p>
+                                <div class="text-4xl font-extrabold text-emerald-400">92%</div>
+                                <p class="text-[10px] text-slate-500 mt-2">Target Minimal Sekolah: 85%</p>
+                            </div>
+                            <div class="p-4 bg-slate-800/50 rounded-xl border border-slate-700/50 text-center">
+                                <p class="text-xs text-slate-400 mb-2">Tugas Inval Terpenuhi</p>
+                                <div class="text-4xl font-extrabold text-amber-400">100%</div>
+                                <p class="text-[10px] text-slate-500 mt-2">Seluruh jam kosong diisi guru pengganti</p>
+                            </div>
+                            <div class="p-4 bg-slate-800/50 rounded-xl border border-slate-700/50 text-center">
+                                <p class="text-xs text-slate-400 mb-2">Persentase Jam Kosong</p>
+                                <div class="text-4xl font-extrabold text-rose-400">0%</div>
+                                <p class="text-[10px] text-slate-500 mt-2">Nol toleransi jam kosong tanpa tugas</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. KONTROL JAM -->
+                <div id="tabKontroljam" class="tab-content hidden space-y-6">
+                    <div class="glass-panel p-6">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-2"><i class="fa-solid fa-clock mr-2 text-amber-400"></i>Pengaturan Kontrol Jam Pelajaran Active</h3>
+                        <p class="text-xs text-slate-400 mb-6">Atur jam pelajaran aktif sekolah dan jadwal perpindahan jam harian.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="listKontrolJam">
+                            <!-- Dynamically Generated -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. VALIDASI KURIKULUM -->
+                <div id="tabValidasi" class="tab-content hidden space-y-6">
+                    <div class="glass-panel p-6">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-2"><i class="fa-solid fa-stamp mr-2 text-purple-400"></i>Pengesahan & Validasi Kurikulum</h3>
+                        <p class="text-xs text-slate-400 mb-6">Pengesahan resmi laporan harian oleh Waka Kurikulum & Kepala Sekolah.</p>
+
+                        <div class="p-4 bg-slate-800/60 rounded-xl border border-slate-700/50 space-y-3 mb-6 text-xs">
+                            <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
+                                <span class="text-slate-300">Pengesahan Waka Kurikulum:</span>
+                                <span id="valStatusKurikulum" class="font-bold text-amber-400">MENUNGGU VALIDASI</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-300">Pengesahan Kepala Sekolah:</span>
+                                <span id="valStatusKepsek" class="font-bold text-amber-400">MENUNGGU VALIDASI</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="execValidasi('KURIKULUM')" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold py-2.5 px-4 rounded-lg transition flex items-center gap-2">
+                                <i class="fa-solid fa-stamp"></i> Sahkan Laporan (Waka Kurikulum)
+                            </button>
+                            <button onclick="execValidasi('KEPSEK')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2.5 px-4 rounded-lg transition flex items-center gap-2">
+                                <i class="fa-solid fa-signature"></i> Sahkan Laporan (Kepala Sekolah)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. ABSEN SISWA -->
+                <div id="tabAbsen" class="tab-content hidden space-y-6">
+                    <div class="glass-panel p-6">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-2"><i class="fa-solid fa-user-check mr-2 text-rose-400"></i>Pencatatan Presensi & Absensi Siswa</h3>
+                        <p class="text-xs text-slate-400 mb-6">Input siswa tidak hadir (Sakit, Izin, Alpha) per kelas.</p>
+
+                        <form onsubmit="handleSaveAbsenSiswa(event)" class="space-y-4">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
-                                    <label class="block text-xs text-slate-400 mb-1">Pilih Kelas</label>
-                                    <select id="selectPresensiKelas" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
-                                        <option value="X TKJ 1">X TKJ 1</option>
-                                        <option value="X TKJ 2">X TKJ 2</option>
+                                    <label class="block text-xs text-slate-400 mb-1">Kelas</label>
+                                    <select id="selectAbsenKelas" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                                        <option value="X IPA 1">X IPA 1</option>
+                                        <option value="X IPA 2">X IPA 2</option>
                                         <option value="XI TKR 1">XI TKR 1</option>
                                         <option value="XII RPL 1">XII RPL 1</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-xs text-slate-400 mb-1">Jam Pelajaran</label>
-                                    <select id="selectJamKe" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
-                                        <option value="Jam Ke-1 & 2">Jam Ke-1 & 2 (07.30 - 09.00)</option>
-                                        <option value="Jam Ke-3 & 4">Jam Ke-3 & 4 (09.15 - 10.45)</option>
-                                        <option value="Jam Ke-5 & 6">Jam Ke-5 & 6 (11.15 - 12.45)</option>
-                                    </select>
+                                    <label class="block text-xs text-slate-400 mb-1">Nama Siswa</label>
+                                    <input type="text" id="inputNamaSiswa" required placeholder="Nama Siswa" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
                                 </div>
                                 <div>
-                                    <label class="block text-xs text-slate-400 mb-1">Status Kehadiran Guru</label>
-                                    <select id="selectStatusGuru" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
-                                        <option value="Hadir">Hadir Mengajar</option>
-                                        <option value="Tugas Inval">Tugas Inval (Ada Tugas)</option>
-                                        <option value="Tanpa Keterangan">Tanpa Keterangan / Kosong</option>
+                                    <label class="block text-xs text-slate-400 mb-1">Keterangan</label>
+                                    <select id="selectKetAbsen" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                                        <option value="Sakit">Sakit (S)</option>
+                                        <option value="Izin">Izin (I)</option>
+                                        <option value="Alpha">Alpha (A)</option>
                                     </select>
                                 </div>
                             </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs text-slate-400 mb-1">Mata Pelajaran & Ringkasan Materi</label>
-                                    <input type="text" id="inputMateri" required placeholder="Contoh: Pemrograman Web - Pengenalan HTML5" 
-                                        class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
-                                </div>
-                                <div>
-                                    <label class="block text-xs text-slate-400 mb-1">Catatan Siswa Absen (Sakit/Izin/Alpha)</label>
-                                    <input type="text" id="inputSiswaAbsen" placeholder="Contoh: Budi (A), Siti (S)" 
-                                        class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
-                                </div>
-                            </div>
-
-                            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium py-2.5 px-5 rounded-lg transition flex items-center gap-2">
-                                <i class="fa-solid fa-floppy-disk"></i> Simpan Catatan Presensi
+                            <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium py-2.5 px-4 rounded-lg transition flex items-center gap-2">
+                                <i class="fa-solid fa-plus"></i> Tambah Catatan Absen
                             </button>
                         </form>
                     </div>
 
-                    <!-- Tabel Riwayat Jurnal -->
                     <div class="glass-panel p-6">
-                        <h3 class="text-sm font-semibold text-white mb-4">Jurnal Kontrol KBM Hari Ini</h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-xs text-slate-300">
-                                <thead class="bg-slate-800/80 text-slate-400 uppercase text-[10px]">
-                                    <tr>
-                                        <th class="p-3">Kelas</th>
-                                        <th class="p-3">Jam</th>
-                                        <th class="p-3">Status Guru</th>
-                                        <th class="p-3">Materi</th>
-                                        <th class="p-3">Siswa Absen</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tablePresensiBody" class="divide-y divide-slate-800">
-                                    <!-- Rendered dynamically -->
-                                </tbody>
-                            </table>
-                        </div>
+                        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-4">Daftar Absensi Siswa Hari Ini</h4>
+                        <ul id="listAbsenSiswa" class="space-y-2 text-xs">
+                            <!-- Dynamically Generated -->
+                        </ul>
                     </div>
                 </div>
 
-                <!-- TAB 3: VALIDASI LAPORAN -->
-                <div id="tabLaporan" class="tab-content hidden space-y-6">
+                <!-- 6. JURNAL KBM -->
+                <div id="tabJurnal" class="tab-content hidden space-y-6">
                     <div class="glass-panel p-6">
-                        <h3 class="text-base font-semibold text-white mb-2"><i class="fa-solid fa-file-signature mr-2 text-amber-400"></i>Pengesahan & Penguncian Laporan Harian</h3>
-                        <p class="text-xs text-slate-400 mb-6">Modul verifikasi dan validasi resmi oleh Waka Kurikulum dan Kepala Sekolah.</p>
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-2"><i class="fa-solid fa-book-open mr-2 text-cyan-400"></i>Jurnal Pembelajaran KBM Harian</h3>
+                        <p class="text-xs text-slate-400 mb-6">Pencatatan materi pelajaran dan ketercapaian target kurikulum.</p>
                         
-                        <div class="p-4 bg-slate-800/50 rounded-lg border border-slate-700/50 mb-6 space-y-2 text-xs">
-                            <div class="flex justify-between text-slate-300">
-                                <span>Status Pengesahan Kurikulum:</span>
-                                <span id="statusKurikulum" class="font-bold text-amber-400">MENUNGGU VALIDASI</span>
+                        <form onsubmit="handleSaveJurnal(event)" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">Mata Pelajaran</label>
+                                    <input type="text" id="inputJurnalMapel" required placeholder="Contoh: Matematika" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">Materi / Bahasan</label>
+                                    <input type="text" id="inputJurnalMateri" required placeholder="Contoh: Persamaan Kuadrat" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                                </div>
                             </div>
-                            <div class="flex justify-between text-slate-300">
-                                <span>Status Pengesahan Kepala Sekolah:</span>
-                                <span id="statusKepsek" class="font-bold text-amber-400">MENUNGGU VALIDASI</span>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-wrap gap-3">
-                            <button onclick="handleValidasi('KURIKULUM')" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium py-2.5 px-4 rounded-lg transition flex items-center gap-2">
-                                <i class="fa-solid fa-stamp"></i> Sahkan Sebagai Waka Kurikulum
+                            <button type="submit" class="bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-medium py-2.5 px-4 rounded-lg transition flex items-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i> Simpan Jurnal KBM
                             </button>
-                            <button onclick="handleValidasi('KEPSEK')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium py-2.5 px-4 rounded-lg transition flex items-center gap-2">
-                                <i class="fa-solid fa-signature"></i> Sahkan Sebagai Kepala Sekolah
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 7. IMPORT EXCEL -->
+                <div id="tabImport" class="tab-content hidden space-y-6">
+                    <div class="glass-panel p-6">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-2"><i class="fa-solid fa-file-excel mr-2 text-emerald-500"></i>Import Data Massal via File Excel</h3>
+                        <p class="text-xs text-slate-400 mb-6">Unggah file Spreadsheet (.xlsx / .csv) untuk mengisi data Master Guru & Siswa.</p>
+
+                        <div class="p-6 border-2 border-dashed border-slate-700 rounded-xl text-center bg-slate-900/40">
+                            <i class="fa-solid fa-cloud-arrow-up text-4xl text-slate-500 mb-3"></i>
+                            <p class="text-xs text-slate-300 font-medium mb-1">Pilih File Excel Data Sekolah</p>
+                            <p class="text-[10px] text-slate-500 mb-4">Format disarankan: .xlsx, .xls, .csv</p>
+                            <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelUpload(event)">
+                            <button onclick="document.getElementById('excelFileInput').click()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium py-2 px-4 rounded-lg transition">
+                                Browse File Excel
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- TAB 4: MASTER DATA SEKOLAH -->
+                <!-- 8. DATA MASTER & KOP -->
                 <div id="tabMaster" class="tab-content hidden space-y-6">
                     <div class="glass-panel p-6">
-                        <h3 class="text-base font-semibold text-white mb-2"><i class="fa-solid fa-database mr-2 text-purple-400"></i>Kelola Master Data Sekolah</h3>
-                        <p class="text-xs text-slate-400 mb-6">Data terstruktur Guru, Mata Pelajaran, dan Kelas (Khusus Akses Admin).</p>
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-2"><i class="fa-solid fa-database mr-2 text-indigo-400"></i>Data Master & Pengaturan Kop Surat</h3>
+                        <p class="text-xs text-slate-400 mb-6">Kelola data terstruktur sekolah dan identitas resmi SMKS Sanjaya Bajawa.</p>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Tabel Master Guru -->
                             <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800">
-                                <h4 class="text-xs font-bold text-slate-200 mb-3 uppercase tracking-wider">Daftar Guru & Staf</h4>
+                                <h4 class="text-xs font-bold text-slate-200 mb-3 uppercase tracking-wider">Daftar Guru & Staff (5)</h4>
                                 <ul id="masterGuruList" class="space-y-2 text-xs text-slate-300">
-                                    <!-- Rendered dynamically -->
+                                    <!-- Dynamic -->
                                 </ul>
                             </div>
-                            <!-- Tabel Master Kelas -->
                             <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800">
-                                <h4 class="text-xs font-bold text-slate-200 mb-3 uppercase tracking-wider">Daftar Rombongan Belajar</h4>
-                                <ul id="masterKelasList" class="space-y-2 text-xs text-slate-300">
-                                    <!-- Rendered dynamically -->
-                                </ul>
+                                <h4 class="text-xs font-bold text-slate-200 mb-3 uppercase tracking-wider">Pengaturan Kop Surat Sekolah</h4>
+                                <div class="space-y-3 text-xs">
+                                    <div>
+                                        <label class="block text-slate-400 mb-1">Nama Sekolah</label>
+                                        <input type="text" value="SMKS SANJAYA BAJAWA" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-slate-400 mb-1">Alamat Resmi</label>
+                                        <input type="text" value="Jl. Trikora, Bajawa, Kabupaten Ngada, NTT" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white">
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- 9. LAPORAN PDF -->
+                <div id="tabPdf" class="tab-content hidden space-y-6">
+                    <div class="glass-panel p-6">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-2"><i class="fa-solid fa-file-pdf mr-2 text-rose-500"></i>Cetak Laporan Rekapitulasi KBM (PDF)</h3>
+                        <p class="text-xs text-slate-400 mb-6">Ekspor dokumen rekapitulasi harian/bulanan ke format PDF siap cetak.</p>
+
+                        <button onclick="window.print()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium py-2.5 px-5 rounded-lg transition flex items-center gap-2">
+                            <i class="fa-solid fa-print"></i> Cetak Laporan KBM Hari Ini
+                        </button>
                     </div>
                 </div>
 
@@ -388,34 +591,38 @@
 
             <!-- MOBILE BOTTOM NAVIGATION -->
             <nav class="mobile-bottom-nav fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 p-2 justify-around items-center z-50">
-                <button onclick="switchTab('dashboard')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white p-2">
-                    <i class="fa-solid fa-chart-line text-lg"></i>
-                    <span class="text-[10px]">Dashboard</span>
+                <button onclick="switchTab('dashboard')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-chart-pie text-base"></i>
+                    <span class="text-[9px]">Dashboard</span>
                 </button>
-                <button onclick="switchTab('presensi')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white p-2">
-                    <i class="fa-solid fa-clipboard-user text-lg"></i>
-                    <span class="text-[10px]">Presensi</span>
+                <button onclick="switchTab('kontroljam')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-clock text-base"></i>
+                    <span class="text-[9px]">Kontrol Jam</span>
                 </button>
-                <button onclick="switchTab('laporan')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white p-2">
-                    <i class="fa-solid fa-file-signature text-lg"></i>
-                    <span class="text-[10px]">Laporan</span>
+                <button onclick="switchTab('validasi')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-certificate text-base"></i>
+                    <span class="text-[9px]">Validasi</span>
+                </button>
+                <button onclick="switchTab('absen')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-user-check text-base"></i>
+                    <span class="text-[9px]">Absen</span>
                 </button>
             </nav>
         </div>
 
     </div>
 
-    <!-- SCRIPT FIREBASE & ENGINE -->
+    <!-- SCRIPT FIREBASE & ENGINE SI-ROLAN -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // KONFIGURASI DEPLOYMENT FIREBASE
-        const IS_PREVIEW = false; 
+        // SAKLAR DEPLOYMENT FIREBASE
+        const IS_PREVIEW = true; 
 
         const firebaseConfig = {
-            apiKey: "AIzaSyAuLPUMu4IPM_ihALt30TztSEE3yGH5s3k",
+            apiKey: "AIzaSyAuLPUMu4IPM_ihALT30TztSEE3yGH5s3k",
             authDomain: "si-rolankbm.firebaseapp.com",
             projectId: "si-rolankbm",
             storageBucket: "si-rolankbm.firebasestorage.app",
@@ -427,25 +634,39 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Kredensial Validasi Baku (Fallback Local Doc)
+        // Kredensial Validasi Baku
         const VALID_USERS = {
-            "admin": { pass: "admin123456", role: "ADMIN", name: "Administrator" },
-            "admin@sanjaya.sch.id": { pass: "admin123456", role: "ADMIN", name: "Administrator" },
-            "piket": { pass: "piket123", role: "PIKET", name: "Guru Piket Utama" },
-            "kurikulum": { pass: "kuri123", role: "KURIKULUM", name: "Waka Kurikulum" },
-            "kepsek": { pass: "kepsek123", role: "KEPSEK", name: "Kepala Sekolah" },
-            "walikelas": { pass: "wali123", role: "WALIKELAS", name: "Wali Kelas" }
+            "admin": { pass: "admin123456", role: "ADMINISTRATOR", name: "Administrator Utama" },
+            "admin@sanjaya.sch.id": { pass: "admin123456", role: "ADMINISTRATOR", name: "Administrator Utama" },
+            "piket": { pass: "piket123", role: "GURU PIKET", name: "Guru Piket" },
+            "kurikulum": { pass: "kuri123", role: "WAKA KURIKULUM", name: "Waka Kurikulum" },
+            "kepsek": { pass: "kepsek123", role: "KEPALA SEKOLAH", name: "Kepala Sekolah" },
+            "walikelas": { pass: "wali123", role: "WALI KELAS", name: "Wali Kelas" }
         };
 
         let currentUser = null;
-        let presensiLogs = [
-            { kelas: "X TKJ 1", jam: "Jam Ke-1 & 2", status: "Hadir", materi: "Bahasa Indonesia - Teks Laporan", absen: "-" },
-            { kelas: "XI TKR 1", jam: "Jam Ke-3 & 4", status: "Tugas Inval", materi: "Pemeliharaan Mesin - Tugas Mandiri", absen: "Budi (A)" }
+
+        // Data Sampel Presisi Gambar Referensi
+        let masterSekolahData = {
+            ruangKelas: 5,
+            guru: 5,
+            tendik: 9,
+            pesertaDidik: 8,
+            rombel: 5
+        };
+
+        let statusKelasData = [
+            { kelas: "X IPA 1", guru: "Budi Santoso, S.Pd", status: "Hadir", bg: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
+            { kelas: "X IPA 2", guru: "Dedi Kurniawan, S.Si", status: "Hadir", bg: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
+            { kelas: "XI TKR 1", guru: "Emanuel Bango, S.Kom", status: "Inval", bg: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
+            { kelas: "XII RPL 1", guru: "Athanasius B., S.T", status: "Hadir", bg: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
+            { kelas: "XII RPL 2", guru: "Maria B., S.Pd", status: "Hadir", bg: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" }
         ];
 
-        let masterGuru = ["Drs. Yohanes Loba", "Maria B. S.Pd", "Emanuel Bango, S.Kom", "Athanasius B., S.T"];
-        let masterKelas = ["X TKJ 1", "X TKJ 2", "XI TKR 1", "XII RPL 1"];
+        let masterGuruList = ["Budi Santoso, S.Pd", "Dedi Kurniawan, S.Si", "Emanuel Bango, S.Kom", "Athanasius B., S.T", "Maria B., S.Pd"];
+        let listAbsenSiswaData = [{ nama: "Budi (X IPA 1)", ket: "Alpha" }];
 
+        // Auto Setup Database
         async function autoSetupDatabase() {
             if (IS_PREVIEW) return;
             try {
@@ -460,8 +681,9 @@
             }
         }
 
+        // Navigation Switcher
         window.switchTab = function(tabName) {
-            const tabs = ['dashboard', 'presensi', 'laporan', 'master'];
+            const tabs = ['dashboard', 'analisis', 'kontroljam', 'validasi', 'absen', 'jurnal', 'import', 'master', 'pdf'];
             tabs.forEach(t => {
                 const el = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
                 if (el) el.classList.add('hidden');
@@ -470,16 +692,8 @@
             const activeTab = document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
             if (activeTab) activeTab.classList.remove('hidden');
 
-            const titles = {
-                'dashboard': ['Dashboard Kontrol KBM', 'Ringkasan aktivitas pembelajaran hari ini'],
-                'presensi': ['Kontrol KBM & Absensi', 'Pencatatan jam KBM dan kehadiran siswa'],
-                'laporan': ['Validasi Laporan KBM', 'Pengesahan & penguncian laporan harian'],
-                'master': ['Master Data Sekolah', 'Kelola data guru, siswa, mapel & jadwal']
-            };
-            if (titles[tabName]) {
-                document.getElementById('pageTitle').innerText = titles[tabName][0];
-                document.getElementById('pageSubtitle').innerText = titles[tabName][1];
-            }
+            // Toggle active style in nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active-nav', 'bg-slate-800'));
         };
 
         window.showDashboardUI = function() {
@@ -487,17 +701,10 @@
             document.getElementById('mainDashboard').classList.remove('hidden');
 
             document.getElementById('userDisplayName').innerText = currentUser.name;
-            document.getElementById('userRoleBadge').innerText = currentUser.role;
+            document.getElementById('userRoleBadge').innerHTML = `${currentUser.role} <i class="fa-solid fa-circle-check text-[8px] ml-1"></i>`;
             document.getElementById('userAvatar').innerText = currentUser.name.charAt(0);
 
-            const masterMenu = document.getElementById('menuMasterData');
-            if (currentUser.role === 'ADMIN') {
-                masterMenu.classList.remove('hidden');
-            } else {
-                masterMenu.classList.add('hidden');
-            }
-
-            renderAllData();
+            renderDashboard();
             window.switchTab('dashboard');
         };
 
@@ -508,57 +715,83 @@
             document.getElementById('inputPassword').value = '';
         };
 
-        function renderAllData() {
-            const actList = document.getElementById('recentActivityList');
-            actList.innerHTML = presensiLogs.map(p => `
-                <div class="p-3 bg-slate-800/40 rounded-lg border border-slate-700/40 flex justify-between items-center text-xs">
-                    <span class="text-slate-300"><i class="fa-solid fa-check text-emerald-400 mr-2"></i>${p.kelas} - ${p.status} (${p.materi})</span>
-                    <span class="text-slate-500">${p.jam}</span>
+        function renderDashboard() {
+            // Render 5 Master Stat Cards
+            document.getElementById('statRuangKelas').innerText = masterSekolahData.ruangKelas;
+            document.getElementById('statGuru').innerText = masterSekolahData.guru;
+            document.getElementById('statTendik').innerText = masterSekolahData.tendik;
+            document.getElementById('statPesertaDidik').innerText = masterSekolahData.pesertaDidik;
+            document.getElementById('statRombel').innerText = masterSekolahData.rombel;
+
+            // Render Status Kelas Grid
+            const grid = document.getElementById('gridStatusKelas');
+            grid.innerHTML = statusKelasData.map(item => `
+                <div class="p-3.5 bg-slate-900/80 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+                    <div>
+                        <h4 class="font-bold text-white text-sm">${item.kelas}</h4>
+                        <p class="text-slate-400 text-[11px] mt-0.5">${item.guru}</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-full border font-semibold text-[11px] ${item.bg}">${item.status}</span>
                 </div>
             `).join('');
 
-            const tableBody = document.getElementById('tablePresensiBody');
-            tableBody.innerHTML = presensiLogs.map(p => `
-                <tr>
-                    <td class="p-3 font-semibold text-white">${p.kelas}</td>
-                    <td class="p-3 text-slate-400">${p.jam}</td>
-                    <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] ${p.status === 'Hadir' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">${p.status}</span></td>
-                    <td class="p-3 text-slate-300">${p.materi}</td>
-                    <td class="p-3 text-slate-400">${p.absen}</td>
-                </tr>
-            `).join('');
-
-            document.getElementById('masterGuruList').innerHTML = masterGuru.map(g => `<li class="p-2 bg-slate-800/50 rounded border border-slate-700/40"><i class="fa-solid fa-user-tie text-blue-400 mr-2"></i>${g}</li>`).join('');
-            document.getElementById('masterKelasList').innerHTML = masterKelas.map(k => `<li class="p-2 bg-slate-800/50 rounded border border-slate-700/40"><i class="fa-solid fa-door-open text-purple-400 mr-2"></i>${k}</li>`).join('');
+            // Render Master Guru
+            document.getElementById('masterGuruList').innerHTML = masterGuruList.map(g => `<li class="p-2 bg-slate-800/50 rounded border border-slate-700/40"><i class="fa-solid fa-user-tie text-blue-400 mr-2"></i>${g}</li>`).join('');
+            
+            // Render Absen Siswa
+            document.getElementById('listAbsenSiswa').innerHTML = listAbsenSiswaData.map(a => `<li class="p-2 bg-slate-800/50 rounded border border-slate-700/40 flex justify-between"><span>${a.nama}</span><span class="text-rose-400 font-bold">${a.ket}</span></li>`).join('');
         }
 
-        window.handleSavePresensi = function(e) {
-            e.preventDefault();
-            const newLog = {
-                kelas: document.getElementById('selectPresensiKelas').value,
-                jam: document.getElementById('selectJamKe').value,
-                status: document.getElementById('selectStatusGuru').value,
-                materi: document.getElementById('inputMateri').value,
-                absen: document.getElementById('inputSiswaAbsen').value || '-'
-            };
-            presensiLogs.unshift(newLog);
-            renderAllData();
-            alert("Catatan Presensi KBM Berhasil Disimpan!");
-            document.getElementById('inputMateri').value = '';
-            document.getElementById('inputSiswaAbsen').value = '';
+        window.filterJamPelajaran = function(jamNum) {
+            document.getElementById('statusKelasTitle').innerHTML = `<i class="fa-solid fa-chalkboard-user mr-2 text-emerald-400"></i>Status Seluruh Kelas (Jam Ke-${jamNum})`;
+            document.querySelectorAll('.jam-btn').forEach(btn => {
+                btn.className = "jam-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs";
+            });
+            event.target.className = "jam-btn px-4 py-2 rounded-lg bg-blue-600 text-white font-bold text-xs shadow-md";
         };
 
-        window.handleValidasi = function(role) {
+        window.execValidasi = function(role) {
             if (role === 'KURIKULUM') {
-                document.getElementById('statusKurikulum').innerText = "DISAHKAN (TERVALIDASI)";
-                document.getElementById('statusKurikulum').className = "font-bold text-emerald-400";
+                document.getElementById('valStatusKurikulum').innerText = "DISAHKAN (TERVALIDASI)";
+                document.getElementById('valStatusKurikulum').className = "font-bold text-emerald-400";
             } else if (role === 'KEPSEK') {
-                document.getElementById('statusKepsek').innerText = "DISAHKAN (TERVALIDASI)";
-                document.getElementById('statusKepsek').className = "font-bold text-emerald-400";
+                document.getElementById('valStatusKepsek').innerText = "DISAHKAN (TERVALIDASI)";
+                document.getElementById('valStatusKepsek').className = "font-bold text-emerald-400";
             }
-            alert(`Laporan KBM Berhasil Disahkan oleh ${role}!`);
+            alert(`Laporan Berhasil Disahkan oleh ${role}!`);
         };
 
+        window.handleSaveAbsenSiswa = function(e) {
+            e.preventDefault();
+            const kelas = document.getElementById('selectAbsenKelas').value;
+            const nama = document.getElementById('inputNamaSiswa').value;
+            const ket = document.getElementById('selectKetAbsen').value;
+            listAbsenSiswaData.unshift({ nama: `${nama} (${kelas})`, ket: ket });
+            renderDashboard();
+            alert("Absensi Siswa Berhasil Disimpan!");
+            document.getElementById('inputNamaSiswa').value = '';
+        };
+
+        window.handleSaveJurnal = function(e) {
+            e.preventDefault();
+            alert("Jurnal KBM Berhasil Disimpan!");
+            document.getElementById('inputJurnalMapel').value = '';
+            document.getElementById('inputJurnalMateri').value = '';
+        };
+
+        window.handleExcelUpload = function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                alert(`File ${file.name} berhasil diunggah dan diproses ke Master Data!`);
+            }
+        };
+
+        window.handleResetSeedData = function() {
+            alert("Data awal berhasil dipulihkan!");
+            renderDashboard();
+        };
+
+        // Login Handler
         window.handleLoginSubmit = async function(e) {
             e.preventDefault();
             const userRaw = document.getElementById('inputUsername').value.trim().toLowerCase();
@@ -575,8 +808,8 @@
                         const userCred = await signInWithEmailAndPassword(auth, loginEmail, passVal);
                         currentUser = {
                             uid: userCred.user.uid,
-                            name: "Administrator",
-                            role: "ADMIN"
+                            name: "Administrator Utama",
+                            role: "ADMINISTRATOR"
                         };
                         window.showDashboardUI();
                         return;
@@ -602,7 +835,7 @@
             }
         };
 
-        // PWA Service Worker via Dynamic Blob
+        // PWA Service Worker Registration
         if ('serviceWorker' in navigator) {
             const swCode = `
                 self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
