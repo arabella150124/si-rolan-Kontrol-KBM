@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* Modern Glassmorphic Styling */
         body {
             background: #0f172a;
             color: #f8fafc;
@@ -29,18 +28,21 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 1rem;
         }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        /* Responsif Layout Rules */
+        @media (max-width: 768px) {
+            .desktop-sidebar { display: none !important; }
+            .mobile-bottom-nav { display: flex !important; }
         }
-        /* Hide Blogger Default Layout Elements */
+        @media (min-width: 769px) {
+            .desktop-sidebar { display: flex !important; }
+            .mobile-bottom-nav { display: none !important; }
+        }
         #navbar-iframe, .navbar, .header-outer, .footer-outer, .sidebar-wrapper {
             display: none !important;
         }
     </style>
 </head>
-<body class="antialiased text-slate-100 flex flex-col min-h-screen justify-between">
+<body class="antialiased text-slate-100 flex flex-col min-h-screen">
 
     <!-- LOGIN CONTAINER -->
     <div id="loginScreen" class="min-h-screen w-full flex items-center justify-center p-4 bg-slate-950">
@@ -62,7 +64,7 @@
                     <div class="space-y-4 my-8">
                         <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700/50">
                             <h3 class="text-sm font-semibold text-blue-400 mb-1"><i class="fa-solid fa-shield-halved mr-2"></i>Keamanan Terintegrasi</h3>
-                            <p class="text-xs text-slate-400 leading-relaxed">Aplikasi terintegrasi secara real-time untuk pemantauan KBM, presensi guru, dan kontrol kelas secara transparan.</p>
+                            <p class="text-xs text-slate-400 leading-relaxed">Sistem Informasi Kontrol Kegiatan Pembelajaran terintegrasi real-time untuk Guru Piket, Waka Kurikulum, Kepsek, & Wali Kelas.</p>
                         </div>
                     </div>
                 </div>
@@ -90,12 +92,12 @@
                     <!-- Input Form -->
                     <form id="formLogin" onsubmit="handleLoginSubmit(event)" class="space-y-4">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Username / NIP / ID Pengguna</label>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Username / Email / ID Pengguna</label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                                     <i class="fa-solid fa-user"></i>
                                 </span>
-                                <input type="text" id="inputUsername" required placeholder="Masukkan username" 
+                                <input type="text" id="inputUsername" required placeholder="Contoh: piket, kurikulum, admin" 
                                     class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900">
                             </div>
                         </div>
@@ -109,13 +111,6 @@
                                 <input type="password" id="inputPassword" required placeholder="••••••••" 
                                     class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900">
                             </div>
-                        </div>
-
-                        <div class="flex items-center justify-between text-xs pt-1">
-                            <label class="flex items-center text-slate-600">
-                                <input type="checkbox" checked class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 mr-2">
-                                Ingat Perangkat Ini
-                            </label>
                         </div>
 
                         <button type="submit" id="btnSubmitLogin" 
@@ -137,61 +132,178 @@
     </div>
 
     <!-- MAIN DASHBOARD APP CONTAINER -->
-    <div id="mainDashboard" class="hidden min-h-screen flex flex-col md:flex-row">
-        <!-- Sidebar Navigation Desktop -->
-        <aside class="w-64 bg-slate-900 border-r border-slate-800 p-4 hidden md:flex flex-col justify-between">
+    <div id="mainDashboard" class="hidden min-h-screen flex flex-col md:flex-row w-full bg-slate-950">
+        
+        <!-- SIDEBAR DESKTOP -->
+        <aside class="desktop-sidebar w-64 bg-slate-900 border-r border-slate-800 p-4 flex-col justify-between shrink-0">
             <div>
                 <div class="flex items-center gap-3 pb-6 border-b border-slate-800">
-                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
+                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
                         <i class="fa-solid fa-graduation-cap"></i>
                     </div>
                     <div>
                         <h2 class="font-bold text-sm text-white">SI-ROLAN</h2>
-                        <p class="text-xs text-slate-400">Sanjaya Bajawa</p>
+                        <p class="text-xs text-amber-400">SMKS Sanjaya Bajawa</p>
                     </div>
                 </div>
-                <nav class="mt-6 space-y-2">
-                    <button class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium">
-                        <i class="fa-solid fa-chart-line"></i> Dashboard Utama
+
+                <!-- User Profile Info -->
+                <div class="my-4 p-3 bg-slate-800/60 rounded-lg border border-slate-700/50 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs" id="userAvatar">
+                        A
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-xs font-semibold text-white truncate" id="userDisplayName">Administrator</p>
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wider" id="userRoleBadge">ADMIN</p>
+                    </div>
+                </div>
+
+                <nav class="mt-4 space-y-1">
+                    <button onclick="switchTab('dashboard')" class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 text-sm font-medium transition active-nav">
+                        <i class="fa-solid fa-chart-line w-5 text-blue-400"></i> Dashboard Utama
+                    </button>
+                    <button onclick="switchTab('presensi')" class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 text-sm font-medium transition">
+                        <i class="fa-solid fa-clipboard-user w-5 text-emerald-400"></i> Kontrol KBM & Absen
+                    </button>
+                    <button onclick="switchTab('laporan')" class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 text-sm font-medium transition">
+                        <i class="fa-solid fa-file-signature w-5 text-amber-400"></i> Validasi Laporan
+                    </button>
+                    <button onclick="switchTab('master')" id="menuMasterData" class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 text-sm font-medium transition">
+                        <i class="fa-solid fa-database w-5 text-purple-400"></i> Master Data Sekolah
                     </button>
                 </nav>
             </div>
-            <div>
+
+            <div class="pt-4 border-t border-slate-800">
                 <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg bg-rose-600/20 text-rose-400 hover:bg-rose-600/30 text-sm font-medium transition">
                     <i class="fa-solid fa-right-from-bracket"></i> Logout / Keluar
                 </button>
             </div>
         </aside>
 
-        <!-- Main Content Area -->
-        <main class="flex-1 p-6 bg-slate-950">
-            <header class="flex justify-between items-center pb-6 border-b border-slate-800 mb-6">
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto pb-24 md:pb-8">
+            <!-- Header Bar -->
+            <header class="flex justify-between items-center pb-4 mb-6 border-b border-slate-800">
                 <div>
-                    <h1 class="text-xl font-bold text-white">Dashboard Kontrol KBM</h1>
-                    <p class="text-xs text-slate-400">Selamat datang kembali di Panel SI-ROLAN</p>
+                    <h1 class="text-xl font-bold text-white" id="pageTitle">Dashboard Kontrol KBM</h1>
+                    <p class="text-xs text-slate-400" id="pageSubtitle">Ringkasan aktivitas pembelajaran hari ini</p>
                 </div>
-                <button onclick="handleLogout()" class="md:hidden px-3 py-1.5 bg-rose-600 text-white rounded text-xs">
-                    Logout
+                <button onclick="handleLogout()" class="md:hidden px-3 py-1.5 bg-rose-600/20 text-rose-400 rounded-lg text-xs font-medium border border-rose-500/30">
+                    <i class="fa-solid fa-power-off"></i>
                 </button>
             </header>
-            <div class="glass-panel p-6 text-center text-slate-300">
-                <i class="fa-solid fa-circle-check text-4xl text-emerald-400 mb-3"></i>
-                <h3 class="text-lg font-semibold text-white">Login Berhasil Terverifikasi</h3>
-                <p class="text-sm text-slate-400 mt-1">Sistem otentikasi Firebase Cloud berjalan dengan aman dan lancar.</p>
+
+            <!-- TAB 1: DASHBOARD CONTENT -->
+            <div id="tabDashboard" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="glass-panel p-5 border-l-4 border-blue-500">
+                        <p class="text-xs text-slate-400">Total Kelas KBM</p>
+                        <h3 class="text-2xl font-bold text-white mt-1">12 Kelas</h3>
+                    </div>
+                    <div class="glass-panel p-5 border-l-4 border-emerald-500">
+                        <p class="text-xs text-slate-400">Guru Hadir</p>
+                        <h3 class="text-2xl font-bold text-white mt-1">18 Guru</h3>
+                    </div>
+                    <div class="glass-panel p-5 border-l-4 border-amber-500">
+                        <p class="text-xs text-slate-400">Tugas Inval</p>
+                        <h3 class="text-2xl font-bold text-white mt-1">2 Kelas</h3>
+                    </div>
+                    <div class="glass-panel p-5 border-l-4 border-purple-500">
+                        <p class="text-xs text-slate-400">Status Laporan</p>
+                        <h3 class="text-lg font-bold text-emerald-400 mt-1">Tervalidasi</h3>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6">
+                    <h3 class="text-base font-semibold text-white mb-4"><i class="fa-solid fa-clock-rotate-left mr-2 text-blue-400"></i>Aktivitas Kontrol Real-Time</h3>
+                    <div class="space-y-3" id="recentActivityList">
+                        <div class="p-3 bg-slate-800/40 rounded-lg border border-slate-700/40 flex justify-between items-center text-xs">
+                            <span class="text-slate-300"><i class="fa-solid fa-check text-emerald-400 mr-2"></i>Kelas X TKJ 1 - KBM Berjalan (Bahasa Indonesia)</span>
+                            <span class="text-slate-500">07:45 WITA</span>
+                        </div>
+                        <div class="p-3 bg-slate-800/40 rounded-lg border border-slate-700/40 flex justify-between items-center text-xs">
+                            <span class="text-slate-300"><i class="fa-solid fa-user-clock text-amber-400 mr-2"></i>Kelas XI RPL - Guru Inval Diisi (Tugas Mandiri)</span>
+                            <span class="text-slate-500">08:30 WITA</span>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <!-- TAB 2: PRESENSI & KBM -->
+            <div id="tabPresensi" class="tab-content hidden space-y-6">
+                <div class="glass-panel p-6">
+                    <h3 class="text-base font-semibold text-white mb-4"><i class="fa-solid fa-clipboard-list mr-2 text-emerald-400"></i>Input Presensi Jam KBM</h3>
+                    <p class="text-xs text-slate-400 mb-4">Pilih kelas dan atur kehadiran guru serta catatan ketidakhadiran siswa per jam pelajaran.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <select class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                            <option>-- Pilih Kelas --</option>
+                            <option>X TKJ 1</option>
+                            <option>X TKJ 2</option>
+                            <option>XI TKR 1</option>
+                        </select>
+                        <select class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                            <option>Jam Ke-1 & Ke-2</option>
+                            <option>Jam Ke-3 & Ke-4</option>
+                        </select>
+                        <button class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium py-2 px-4 rounded-lg transition">
+                            Simpan Presensi KBM
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: VALIDASI LAPORAN -->
+            <div id="tabLaporan" class="tab-content hidden space-y-6">
+                <div class="glass-panel p-6">
+                    <h3 class="text-base font-semibold text-white mb-4"><i class="fa-solid fa-file-signature mr-2 text-amber-400"></i>Pengesahan Laporan KBM Harian</h3>
+                    <p class="text-xs text-slate-400 mb-4">Modul verifikasi dan penguncian laporan harian oleh Waka Kurikulum & Kepala Sekolah.</p>
+                    <button class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium py-2.5 px-5 rounded-lg transition">
+                        <i class="fa-solid fa-lock mr-2"></i>Sahkan & Kunci Laporan Hari Ini
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 4: MASTER DATA -->
+            <div id="tabMaster" class="tab-content hidden space-y-6">
+                <div class="glass-panel p-6">
+                    <h3 class="text-base font-semibold text-white mb-4"><i class="fa-solid fa-database mr-2 text-purple-400"></i>Kelola Master Data Sekolah</h3>
+                    <p class="text-xs text-slate-400 mb-4">Pengaturan data Guru, Siswa, Mapel, dan Jadwal Pelajaran (Khusus Akses Admin).</p>
+                </div>
+            </div>
+
+            <footer class="mt-8 text-center text-xs text-slate-500 border-t border-slate-800/60 pt-4 flex justify-between items-center">
+                <span>© 2026 SI-ROLAN System | SMKS Sanjaya Bajawa</span>
+                <a href="https://wa.me/6282236008339" target="_blank" class="text-emerald-400 hover:underline flex items-center gap-1">
+                    <i class="fa-brands fa-whatsapp"></i> by Ally Raring
+                </a>
+            </footer>
         </main>
+
+        <!-- MOBILE BOTTOM NAVIGATION -->
+        <nav class="mobile-bottom-nav fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 p-2 justify-around items-center z-50">
+            <button onclick="switchTab('dashboard')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white p-2">
+                <i class="fa-solid fa-chart-line text-lg"></i>
+                <span class="text-[10px]">Dashboard</span>
+            </button>
+            <button onclick="switchTab('presensi')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white p-2">
+                <i class="fa-solid fa-clipboard-user text-lg"></i>
+                <span class="text-[10px]">Presensi</span>
+            </button>
+            <button onclick="switchTab('laporan')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white p-2">
+                <i class="fa-solid fa-file-signature text-lg"></i>
+                <span class="text-[10px]">Laporan</span>
+            </button>
+        </nav>
     </div>
 
-    <!-- SCRIPT FIREBASE & STRICT AUTH HANDLER -->
+    <!-- SCRIPT FIREBASE & AUTH ENGINE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // CONFIGURATION SWITCH
-        const IS_PREVIEW = false; // Mode Production Firebase
-
-        const firebaseConfig = {    
+        const firebaseConfig = {
             apiKey: "AIzaSyAuLPUMu4IPM_ihALt30TztSEE3yGH5s3k",
             authDomain: "si-rolankbm.firebaseapp.com",
             projectId: "si-rolankbm",
@@ -200,54 +312,115 @@
             appId: "1:288760139849:web:6e6b92dc9310b79c86af98"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Kredensial Validasi Baku (Fallback Local Doc)
+        // Validasi Akun Lokal Baku
         const VALID_USERS = {
-            "piket": "piket123",
-            "kurikulum": "kuri123",
-            "kepsek": "kepsek123",
-            "walikelas": "wali123"
+            "admin": { pass: "admin123456", role: "ADMIN", name: "Administrator" },
+            "admin@sanjaya.sch.id": { pass: "admin123456", role: "ADMIN", name: "Administrator" },
+            "piket": { pass: "piket123", role: "PIKET", name: "Guru Piket Utama" },
+            "kurikulum": { pass: "kuri123", role: "KURIKULUM", name: "Waka Kurikulum" },
+            "kepsek": { pass: "kepsek123", role: "KEPSEK", name: "Kepala Sekolah" },
+            "walikelas": { pass: "wali123", role: "WALIKELAS", name: "Wali Kelas" }
         };
 
-        // Handle Form Submit Login
+        let currentUser = null;
+
+        // Login Handler
         window.handleLoginSubmit = async function(e) {
             e.preventDefault();
-            const userVal = document.getElementById('inputUsername').value.trim();
+            const userRaw = document.getElementById('inputUsername').value.trim().toLowerCase();
             const passVal = document.getElementById('inputPassword').value.trim();
             const errorAlert = document.getElementById('loginErrorAlert');
             
             errorAlert.classList.add('hidden');
 
             try {
-                // 1. Cek Admin via Firebase Auth jika input berupa email Admin
-                if (userVal.includes('@')) {
-                    await signInWithEmailAndPassword(auth, userVal, passVal);
-                    showDashboard();
-                    return;
+                // Konversi input 'admin' ke format email jika perlu
+                let loginEmail = userRaw === 'admin' ? 'admin@sanjaya.sch.id' : userRaw;
+
+                // 1. Coba Otentikasi via Firebase Auth (Jika email admin)
+                if (loginEmail.includes('@')) {
+                    try {
+                        const userCred = await signInWithEmailAndPassword(auth, loginEmail, passVal);
+                        currentUser = {
+                            uid: userCred.user.uid,
+                            name: "Administrator",
+                            role: "ADMIN"
+                        };
+                        showDashboardUI();
+                        return;
+                    } catch (authErr) {
+                        console.warn("Firebase Auth fallback to local check:", authErr.code);
+                    }
                 }
 
-                // 2. Cek Akun Peran Sekolah via Validasi Password Ketat
-                if (VALID_USERS[userVal] && VALID_USERS[userVal] === passVal) {
-                    showDashboard();
+                // 2. Cek Akun via Validasi Baku Lokal/Firestore
+                const matchedUser = VALID_USERS[userRaw] || VALID_USERS[loginEmail];
+                if (matchedUser && matchedUser.pass === passVal) {
+                    currentUser = {
+                        uid: userRaw,
+                        name: matchedUser.name,
+                        role: matchedUser.role
+                    };
+                    showDashboardUI();
                 } else {
                     throw new Error("Username atau Kata Sandi Salah!");
                 }
             } catch (err) {
-                document.getElementById('loginErrorMessage').innerText = err.message || "Gagal masuk. Periksa kembali kredensial Anda.";
+                document.getElementById('loginErrorMessage').innerText = err.message || "Gagal masuk. Periksa kredensial Anda.";
                 errorAlert.classList.remove('hidden');
             }
         };
 
-        function showDashboard() {
+        function showDashboardUI() {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('mainDashboard').classList.remove('hidden');
+
+            // Set Profile Header Info
+            document.getElementById('userDisplayName').innerText = currentUser.name;
+            document.getElementById('userRoleBadge').innerText = currentUser.role;
+            document.getElementById('userAvatar').innerText = currentUser.name.charAt(0);
+
+            // Tampilkan/Sembunyikan Menu Master berdasarkan Peran
+            const masterMenu = document.getElementById('menuMasterData');
+            if (currentUser.role === 'ADMIN') {
+                masterMenu.classList.remove('hidden');
+            } else {
+                masterMenu.classList.add('hidden');
+            }
+
+            // Render Tab Default (Dashboard)
+            switchTab('dashboard');
         }
 
+        window.switchTab = function(tabName) {
+            const tabs = ['dashboard', 'presensi', 'laporan', 'master'];
+            tabs.forEach(t => {
+                const el = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
+                if (el) el.classList.add('hidden');
+            });
+
+            const activeTab = document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+            if (activeTab) activeTab.classList.remove('hidden');
+
+            // Update Header Titles
+            const titles = {
+                'dashboard': ['Dashboard Kontrol KBM', 'Ringkasan aktivitas pembelajaran hari ini'],
+                'presensi': ['Kontrol KBM & Absensi', 'Pencatatan jam KBM dan kehadiran siswa'],
+                'laporan': ['Validasi Laporan KBM', 'Pengesahan & penguncian laporan harian'],
+                'master': ['Master Data Sekolah', 'Kelola data guru, siswa, mapel & jadwal']
+            };
+            if (titles[tabName]) {
+                document.getElementById('pageTitle').innerText = titles[tabName][0];
+                document.getElementById('pageSubtitle').innerText = titles[tabName][1];
+            }
+        };
+
         window.handleLogout = function() {
+            currentUser = null;
             document.getElementById('mainDashboard').classList.add('hidden');
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('inputPassword').value = '';
